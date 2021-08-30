@@ -239,7 +239,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.ShareExternal"
+        <activity android:name=".activity.ShareExternalStoryActivity"
+            android:theme="@style/Theme.Translucent"
+            android:windowSoftInputMode="adjustResize"
+            android:launchMode="singleInstance"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
