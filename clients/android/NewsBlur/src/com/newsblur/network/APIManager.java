@@ -12,6 +12,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -30,6 +33,7 @@ import com.newsblur.network.domain.LoginResponse;
 import com.newsblur.network.domain.NewsBlurResponse;
 import com.newsblur.network.domain.ProfileResponse;
 import com.newsblur.network.domain.RegisterResponse;
+import com.newsblur.network.domain.ShareExternalStoryResponse;
 import com.newsblur.network.domain.StarredStoryHashesResponse;
 import com.newsblur.network.domain.StoriesResponse;
 import com.newsblur.network.domain.StoryChangesResponse;
@@ -360,6 +364,16 @@ public class APIManager {
 			return false;
 		}
 	}
+
+	public ShareExternalStoryResponse shareExternalStory(@NonNull String storyTitle, @NonNull String storyUrl, @NonNull String shareComemnts) {
+        ContentValues values = new ContentValues();
+        values.put(APIConstants.PARAMETER_TITLE, storyTitle);
+        values.put(APIConstants.PARAMETER_STORY_URL, storyUrl);
+        values.put(APIConstants.PARAMETER_SHARE_COMMENT, shareComemnts);
+
+        APIResponse response = post(buildUrl(APIConstants.PATH_SHARE_EXTERNAL_STORY), values);
+        return (ShareExternalStoryResponse) response.getResponse(gson, ShareExternalStoryResponse.class);
+    }
 
     public StoriesResponse shareStory(String storyId, String feedId, String comment, String sourceUserId) {
         ContentValues values = new ContentValues();
