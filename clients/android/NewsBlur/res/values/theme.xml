@@ -16,6 +16,7 @@
         <item name="actionbarBackground">@style/actionbarBackground</item>
         <item name="listBackground">@style/listBackground</item>
         <item name="layoutBackground">@style/layoutBackground</item>
+        <item name="layoutRoundedBackground">@style/layoutRoundedBackground</item>
         <item name="readingBackground">@style/readingBackground</item>
         <item name="defaultText">@style/defaultText</item>
         <item name="linkText">@style/linkText</item>
@@ -70,6 +71,7 @@
         <item name="actionbarBackground">@style/actionbarBackground.dark</item>
         <item name="listBackground">@style/listBackground.dark</item>
         <item name="layoutBackground">@style/layoutBackground.dark</item>
+        <item name="layoutRoundedBackground">@style/layoutRoundedBackground.dark</item>
         <item name="readingBackground">@style/readingBackground.dark</item>
         <item name="defaultText">@style/defaultText.dark</item>
         <item name="linkText">@style/linkText.dark</item>
@@ -125,6 +127,7 @@
         <item name="actionbarBackground">@style/actionbarBackground.black</item>
         <item name="listBackground">@style/listBackground.dark</item>
         <item name="layoutBackground">@style/layoutBackground.black</item>
+        <item name="layoutRoundedBackground">@style/layoutRoundedBackground.black</item>
         <item name="readingBackground">@style/readingBackground.black</item>
         <item name="defaultText">@style/defaultText.dark</item>
         <item name="linkText">@style/linkText.dark</item>

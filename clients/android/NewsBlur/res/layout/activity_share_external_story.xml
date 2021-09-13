@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
@@ -11,19 +12,20 @@
         android:background="@android:color/black" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
-        style="?layoutBackground"
+        style="?layoutRoundedBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginHorizontal="24dp"
         android:layout_marginVertical="32dp"
+        android:animateLayoutChanges="true"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
         android:paddingVertical="16dp">
 
         <TextView
             android:id="@+id/text_title"
-            style="?defaultText"
+            style="?title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:lineSpacingExtra="@dimen/extra_line_spacing"
@@ -42,6 +44,7 @@
             android:textSize="15sp" />
 
         <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/container_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -69,6 +72,18 @@
                 android:textSize="16sp" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="12dp"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/newsblur_blue"
+            app:indicatorSize="32dp" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

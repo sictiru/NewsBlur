@@ -8,9 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import com.newsblur.R
 import com.newsblur.databinding.ActivityShareExternalStoryBinding
 import com.newsblur.network.APIManager
-import com.newsblur.util.FeedUtils
-import com.newsblur.util.PrefsUtils
-import com.newsblur.util.executeAsyncTask
+import com.newsblur.util.*
 
 class ShareExternalStoryActivity : AppCompatActivity() {
 
@@ -48,7 +46,8 @@ class ShareExternalStoryActivity : AppCompatActivity() {
     private fun shareStory(comment: String) {
         lifecycleScope.executeAsyncTask(
                 onPreExecute = {
-                    // TODO loading bar
+                    binding.progressIndicator.setViewVisible()
+                    binding.containerButtons.setViewGone()
                 },
                 doInBackground = {
                     apiManager.shareExternalStory(storyTitle!!, storyUrl!!, comment)
@@ -65,7 +64,7 @@ class ShareExternalStoryActivity : AppCompatActivity() {
     }
 
     private fun finishWithToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         finish()
     }
 }
