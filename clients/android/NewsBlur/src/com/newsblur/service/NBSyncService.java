@@ -20,6 +20,7 @@ import static com.newsblur.service.NBSyncReceiver.UPDATE_STATUS;
 import static com.newsblur.service.NBSyncReceiver.UPDATE_STORY;
 
 import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.newsblur.database.DatabaseConstants;
 import com.newsblur.domain.Feed;
@@ -1264,7 +1265,7 @@ public class NBSyncService extends JobService {
 
     private void broadcastSync(@NonNull Intent intent) {
         if (NbApplication.isAppForeground()) {
-            sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         }
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.newsblur.NbApplication
 import com.newsblur.R
 import com.newsblur.activity.NbActivity
@@ -604,7 +605,7 @@ object FeedUtils {
             Intent(NBSyncReceiver.NB_SYNC_ACTION).apply {
                 putExtra(NBSyncReceiver.NB_SYNC_UPDATE_TYPE, updateType)
             }.also {
-                context.sendBroadcast(it)
+                LocalBroadcastManager.getInstance(context).sendBroadcast(it)
             }
         }
     }

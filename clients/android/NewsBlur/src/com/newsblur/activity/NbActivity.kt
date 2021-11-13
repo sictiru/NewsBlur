@@ -1,15 +1,16 @@
 package com.newsblur.activity
 
 import android.content.IntentFilter
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.newsblur.service.NBSyncReceiver
 import com.newsblur.util.FeedUtils.offerInitContext
 import com.newsblur.util.FeedUtils.triggerSync
-import androidx.appcompat.app.AppCompatActivity
+import com.newsblur.util.Log
 import com.newsblur.util.PrefConstants.ThemeValue
-import android.os.Bundle
 import com.newsblur.util.PrefsUtils
 import com.newsblur.util.UIUtils
-import com.newsblur.service.NBSyncReceiver
-import com.newsblur.util.Log
 
 /**
  * The base class for all Activities in the NewsBlur app.  Handles enforcement of
@@ -70,15 +71,17 @@ open class NbActivity : AppCompatActivity() {
             PrefsUtils.applyThemePreference(this)
             UIUtils.restartActivity(this)
         }
-        registerReceiver(serviceSyncReceiver, IntentFilter().apply {
-            addAction(NBSyncReceiver.NB_SYNC_ACTION)
-        })
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(serviceSyncReceiver, IntentFilter().apply {
+                addAction(NBSyncReceiver.NB_SYNC_ACTION)
+            })
     }
 
     override fun onPause() {
         Log.d(this.javaClass.name, "onPause")
         super.onPause()
-        unregisterReceiver(serviceSyncReceiver)
+        LocalBroadcastManager.getInstance(this)
+            .unregisterReceiver(serviceSyncReceiver)
     }
 
     private fun finishIfNotLoggedIn() {
