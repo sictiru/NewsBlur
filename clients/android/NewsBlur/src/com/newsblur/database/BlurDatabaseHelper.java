@@ -1169,10 +1169,9 @@ public class BlurDatabaseHelper {
     }
 
     public Loader<Cursor> getActiveStoriesLoader(final FeedSet fs) {
-        final StoryOrder order = PrefsUtils.getStoryOrder(context, fs);
         return new QueryCursorLoader(context) {
             protected Cursor createCursor() {
-                return getActiveStoriesCursor(fs, order, cancellationSignal);
+                return getActiveStoriesCursor(fs, cancellationSignal);
             }
         };
     }
@@ -1204,7 +1203,8 @@ public class BlurDatabaseHelper {
         return rawQuery(q.toString(), null, cancellationSignal);
     }
 
-    private Cursor getActiveStoriesCursor(FeedSet fs, StoryOrder order, CancellationSignal cancellationSignal) {
+    public Cursor getActiveStoriesCursor(FeedSet fs, CancellationSignal cancellationSignal) {
+        final StoryOrder order = PrefsUtils.getStoryOrder(context, fs);
         // get the stories for this FS
         Cursor result = getActiveStoriesCursorNoPrep(fs, order, cancellationSignal);
         // if the result is blank, try to prime the session table with existing stories, in case we
