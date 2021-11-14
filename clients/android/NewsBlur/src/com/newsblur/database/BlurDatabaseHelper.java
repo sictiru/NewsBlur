@@ -1135,9 +1135,8 @@ public class BlurDatabaseHelper {
         };
     }
 
-    private Cursor getSavedStoryCountsCursor(CancellationSignal cancellationSignal) {
-        Cursor c = query(false, DatabaseConstants.STARREDCOUNTS_TABLE, null, null, null, null, null, null, null, cancellationSignal);
-        return c;
+    public Cursor getSavedStoryCountsCursor(CancellationSignal cancellationSignal) {
+        return query(false, DatabaseConstants.STARREDCOUNTS_TABLE, null, null, null, null, null, null, null, cancellationSignal);
     }
 
     private Cursor getSavedSearchCursor(CancellationSignal cancellationSignal) {
