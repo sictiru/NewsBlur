@@ -31,7 +31,7 @@ import com.newsblur.service.NBSyncService
 import com.newsblur.util.*
 import com.newsblur.util.PrefConstants.ThemeValue
 import com.newsblur.view.ReadingScrollView.ScrollChangeListener
-import com.newsblur.viewModel.ActiveStoriesViewModel
+import com.newsblur.viewModel.StoriesViewModel
 import java.lang.Runnable
 import java.util.*
 import kotlin.math.abs
@@ -64,7 +64,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
     private lateinit var volumeKeyNavigation: VolumeKeyNavigation
     private lateinit var intelState: StateFilter
     private lateinit var binding: ActivityReadingBinding
-    private lateinit var activeStoriesViewModel: ActiveStoriesViewModel
+    private lateinit var storiesViewModel: StoriesViewModel
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -73,7 +73,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
 
     override fun onCreate(savedInstanceBundle: Bundle?) {
         super.onCreate(savedInstanceBundle)
-        activeStoriesViewModel = ViewModelProvider(this).get(ActiveStoriesViewModel::class.java)
+        storiesViewModel = ViewModelProvider(this).get(StoriesViewModel::class.java)
         binding = ActivityReadingBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -181,14 +181,14 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
     }
 
     private fun setupObservers() {
-        activeStoriesViewModel.activeStoriesLiveData.observe(this) {
+        storiesViewModel.activeStoriesLiveData.observe(this) {
             setCursorData(it)
         }
     }
 
     private fun getActiveStoriesCursor(finishOnInvalidFs: Boolean = false) {
         fs?.let {
-            activeStoriesViewModel.getActiveStories(it)
+            storiesViewModel.getActiveStories(it)
         } ?: run {
             if (finishOnInvalidFs) {
                 Log.e(this.javaClass.name, "can't create activity, no feedset ready")

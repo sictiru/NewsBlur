@@ -1052,22 +1052,6 @@ public class BlurDatabaseHelper {
         synchronized (RW_MUTEX) {dbRW.insertOrThrow(DatabaseConstants.STORY_TEXT_TABLE, null, values);}
     }
 
-    /**
-     * Get a loader that always returns a null cursor, for fragments that know they will never
-     * have a result (such as muted feeds).
-     */
-    public Loader<Cursor> getNullLoader() {
-        return new AsyncTaskLoader<Cursor>(context) {
-            public Cursor loadInBackground() {return null;}
-        };
-    }
-        
-    public Loader<Cursor> getSocialFeedsLoader() {
-        return new QueryCursorLoader(context) {
-            protected Cursor createCursor() {return getSocialFeedsCursor(cancellationSignal);}
-        };
-    }
-
     public Cursor getSocialFeedsCursor(CancellationSignal cancellationSignal) {
         return query(false, DatabaseConstants.SOCIALFEED_TABLE, null, null, null, null, null, "UPPER(" + DatabaseConstants.SOCIAL_FEED_TITLE + ") ASC", null, cancellationSignal);
     }
@@ -1103,43 +1087,19 @@ public class BlurDatabaseHelper {
         return folders;
     }
 
-    public Loader<Cursor> getFoldersLoader() {
-        return new QueryCursorLoader(context) {
-            protected Cursor createCursor() {return getFoldersCursor(cancellationSignal);}
-        };
-    }
-
     public Cursor getFoldersCursor(CancellationSignal cancellationSignal) {
         return query(false, DatabaseConstants.FOLDER_TABLE, null, null, null, null, null, null, null, cancellationSignal);
-    }
-
-    public Loader<Cursor> getFeedsLoader() {
-        return new QueryCursorLoader(context) {
-            protected Cursor createCursor() {return getFeedsCursor(cancellationSignal);}
-        };
     }
 
     public Cursor getFeedsCursor(CancellationSignal cancellationSignal) {
         return query(false, DatabaseConstants.FEED_TABLE, null, null, null, null, null, "UPPER(" + DatabaseConstants.FEED_TITLE + ") ASC", null, cancellationSignal);
     }
 
-    public Loader<Cursor> getSavedStoryCountsLoader() {
-        return new QueryCursorLoader(context) {
-            protected Cursor createCursor() {return getSavedStoryCountsCursor(cancellationSignal);}
-        };
-    }
-
-    public Loader<Cursor> getSavedSearchLoader() {
-        return new QueryCursorLoader(context) {
-            protected Cursor createCursor() {return getSavedSearchCursor(cancellationSignal);}
-        };
-    }
-
     public Cursor getSavedStoryCountsCursor(CancellationSignal cancellationSignal) {
         return query(false, DatabaseConstants.STARREDCOUNTS_TABLE, null, null, null, null, null, null, null, cancellationSignal);
     }
 
-    private Cursor getSavedSearchCursor(CancellationSignal cancellationSignal) {
+    public Cursor getSavedSearchCursor(CancellationSignal cancellationSignal) {
         return query(false, DatabaseConstants.SAVED_SEARCH_TABLE, null, null, null, null,  null, null, null, cancellationSignal);
     }
 
@@ -1165,23 +1125,6 @@ public class BlurDatabaseHelper {
         }
         c.close();
         return feedIds;
-    }
-
-    public Loader<Cursor> getActiveStoriesLoader(final FeedSet fs) {
-        return new QueryCursorLoader(context) {
-            protected Cursor createCursor() {
-                return getActiveStoriesCursor(fs, cancellationSignal);
-            }
-        };
-    }
-
-    public Loader<Cursor> getStoriesLoader(@Nullable final FeedSet fs) {
-        return new QueryCursorLoader(context) {
-            @Override
-            protected Cursor createCursor() {
-                return getStoriesCursor(fs, cancellationSignal);
-            }
-        };
     }
 
     private Cursor getStoriesCursor(@Nullable FeedSet fs, CancellationSignal cancellationSignal) {

@@ -36,7 +36,7 @@ import com.newsblur.util.ThumbnailStyle;
 import com.newsblur.util.UIUtils;
 import com.newsblur.util.ViewUtils;
 import com.newsblur.view.ProgressThrobber;
-import com.newsblur.viewModel.ActiveStoriesViewModel;
+import com.newsblur.viewModel.StoriesViewModel;
 
 public class ItemSetFragment extends NbFragment {
 
@@ -73,7 +73,7 @@ public class ItemSetFragment extends NbFragment {
 
     private FragmentItemgridBinding binding;
     private RowFleuronBinding fleuronBinding;
-    private ActiveStoriesViewModel activeStoriesViewModel;
+    private StoriesViewModel storiesViewModel;
 
 	public static ItemSetFragment newInstance() {
 		ItemSetFragment fragment = new ItemSetFragment();
@@ -85,7 +85,7 @@ public class ItemSetFragment extends NbFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activeStoriesViewModel = new ViewModelProvider(this).get(ActiveStoriesViewModel.class);
+        storiesViewModel = new ViewModelProvider(this).get(StoriesViewModel.class);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class ItemSetFragment extends NbFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        activeStoriesViewModel.getActiveStoriesLiveData().observe(getViewLifecycleOwner(), this::setCursor);
+        storiesViewModel.getActiveStoriesLiveData().observe(getViewLifecycleOwner(), this::setCursor);
 
         FeedSet fs = getFeedSet();
         if (fs == null) {
@@ -248,7 +248,7 @@ public class ItemSetFragment extends NbFragment {
 	public void hasUpdated() {
         FeedSet fs = getFeedSet();
         if (isAdded() && fs != null) {
-            activeStoriesViewModel.getActiveStories(fs);
+            storiesViewModel.getActiveStories(fs);
         }
 	}
 
