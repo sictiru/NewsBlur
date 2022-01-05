@@ -19,19 +19,20 @@ import com.newsblur.util.FeedUtils.offerInitContext
 import java.util.*
 import kotlin.math.min
 
-class WidgetRemoteViewsFactory internal constructor(context: Context, intent: Intent) : RemoteViewsFactory {
+class WidgetRemoteViewsFactory(context: Context, intent: Intent, apiManager: APIManager) : RemoteViewsFactory {
 
     private val context: Context
+    private val apiManager: APIManager
     private var fs: FeedSet? = null
     private val appWidgetId: Int
     private var dataCompleted = false
     private val storyItems: MutableList<Story> = ArrayList()
     private val cancellationSignal = CancellationSignal()
-    private var apiManager: APIManager? = null
 
     init {
         Log.d(TAG, "Constructor")
         this.context = context
+        this.apiManager = apiManager //TODO TEST
         appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID)
     }
@@ -47,7 +48,6 @@ class WidgetRemoteViewsFactory internal constructor(context: Context, intent: In
      */
     override fun onCreate() {
         Log.d(TAG, "onCreate")
-        apiManager = APIManager(context)
         // widget could be created before app init
         // wait for the dbHelper to be ready for use
         while (FeedUtils.dbHelper == null) {
@@ -141,7 +141,7 @@ class WidgetRemoteViewsFactory internal constructor(context: Context, intent: In
                 return
             }
             Log.d(TAG, "onDataSetChanged - fetch stories")
-            val response = apiManager!!.getStories(fs, 1, StoryOrder.NEWEST, ReadFilter.ALL)
+            val response = apiManager.getStories(fs, 1, StoryOrder.NEWEST, ReadFilter.ALL)
             if (response?.stories == null) {
                 Log.d(TAG, "Error fetching widget stories")
             } else {

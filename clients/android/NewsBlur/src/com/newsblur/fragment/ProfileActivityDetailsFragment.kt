@@ -20,21 +20,20 @@ import com.newsblur.domain.UserDetails
 import com.newsblur.network.APIManager
 import com.newsblur.util.*
 import com.newsblur.view.ActivityDetailsAdapter
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 abstract class ProfileActivityDetailsFragment : Fragment(), OnItemClickListener {
+
+    @Inject
+    lateinit var apiManager: APIManager
 
     private lateinit var binding: FragmentProfileactivityBinding
     private lateinit var footerBinding: RowLoadingThrobberBinding
 
-    @JvmField
-    protected var apiManager: APIManager? = null
     private var adapter: ActivityDetailsAdapter? = null
     private var user: UserDetails? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        apiManager = APIManager(requireActivity())
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_profileactivity, null)

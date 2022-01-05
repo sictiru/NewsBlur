@@ -17,6 +17,10 @@ import com.newsblur.service.NBSyncReceiver
 import com.newsblur.service.NBSyncReceiver.Companion.UPDATE_METADATA
 import com.newsblur.service.NBSyncReceiver.Companion.UPDATE_SOCIAL
 import com.newsblur.service.NBSyncReceiver.Companion.UPDATE_STORY
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import java.util.*
 
 object FeedUtils {
@@ -113,9 +117,11 @@ object FeedUtils {
 
     @JvmStatic
     fun deleteSavedSearch(feedId: String?, query: String?, context: Context) {
+        val hiltEntryPoint = EntryPointAccessors
+                .fromApplication(context, FeedUtilsEntryPoint::class.java)
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    APIManager(context).deleteSearch(feedId, query)
+                    hiltEntryPoint.apiManager().deleteSearch(feedId, query)
                 },
                 onPostExecute = { newsBlurResponse ->
                     if (!newsBlurResponse.isError) {
@@ -143,9 +149,11 @@ object FeedUtils {
 
     @JvmStatic
     fun deleteFeed(feedId: String?, folderName: String?, context: Context) {
+        val hiltEntryPoint = EntryPointAccessors
+                .fromApplication(context, FeedUtilsEntryPoint::class.java)
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    APIManager(context).deleteFeed(feedId, folderName)
+                    hiltEntryPoint.apiManager().deleteFeed(feedId, folderName)
                 },
                 onPostExecute = {
                     // TODO: we can't check result.isError() because the delete call sets the .message property on all calls. find a better error check
@@ -157,9 +165,11 @@ object FeedUtils {
 
     @JvmStatic
     fun deleteSocialFeed(userId: String?, context: Context) {
+        val hiltEntryPoint = EntryPointAccessors
+                .fromApplication(context, FeedUtilsEntryPoint::class.java)
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    APIManager(context).unfollowUser(userId)
+                    hiltEntryPoint.apiManager().unfollowUser(userId)
                 },
                 onPostExecute = {
                     // TODO: we can't check result.isError() because the delete call sets the .message property on all calls. find a better error check
@@ -490,10 +500,11 @@ object FeedUtils {
     @JvmStatic
     fun moveFeedToFolders(context: Context, feedId: String?, toFolders: Set<String?>, inFolders: Set<String?>?) {
         if (toFolders.isEmpty()) return
+        val hiltEntryPoint = EntryPointAccessors
+                .fromApplication(context, FeedUtilsEntryPoint::class.java)
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    val apiManager = APIManager(context)
-                    apiManager.moveFeedToFolders(feedId, toFolders, inFolders)
+                    hiltEntryPoint.apiManager().moveFeedToFolders(feedId, toFolders, inFolders)
                 },
                 onPostExecute = {
                     NBSyncService.forceFeedsFolders()
@@ -608,4 +619,10 @@ object FeedUtils {
             }
         }
     }
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface FeedUtilsEntryPoint {
+    fun apiManager(): APIManager
 }

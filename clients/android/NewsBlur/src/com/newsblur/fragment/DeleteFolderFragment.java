@@ -14,7 +14,15 @@ import com.newsblur.network.APIManager;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedUtils;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class DeleteFolderFragment extends DialogFragment {
+
+    @Inject
+    APIManager apiManager;
 
     private static final String FOLDER_NAME = "folder_name";
     private static final String FOLDER_PARENT = "folder_parent";
@@ -42,7 +50,7 @@ public class DeleteFolderFragment extends DialogFragment {
                 if (!TextUtils.isEmpty(folderParent) && !folderParent.equals(AppConstants.ROOT_FOLDER)) {
                     inFolder = folderParent;
                 }
-                FeedUtils.deleteFolder(folderName, inFolder, getActivity(), new APIManager(getActivity()));
+                FeedUtils.deleteFolder(folderName, inFolder, getActivity(), apiManager);
                 DeleteFolderFragment.this.dismiss();
             }
         });

@@ -19,7 +19,15 @@ import com.newsblur.network.APIManager;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedUtils;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class RenameDialogFragment extends DialogFragment {
+
+    @Inject
+    APIManager apiManager;
 
     private static final String FEED = "feed";
     private static final String FOLDER = "folder";
@@ -95,7 +103,7 @@ public class RenameDialogFragment extends DialogFragment {
                     if (!TextUtils.isEmpty(folderParentName) && !folderParentName.equals(AppConstants.ROOT_FOLDER)) {
                         inFolder = folderParentName;
                     }
-                    FeedUtils.renameFolder(folderName, newFolderName, inFolder, activity, new APIManager(activity));
+                    FeedUtils.renameFolder(folderName, newFolderName, inFolder, activity, apiManager);
                     RenameDialogFragment.this.dismiss();
                 }
             });

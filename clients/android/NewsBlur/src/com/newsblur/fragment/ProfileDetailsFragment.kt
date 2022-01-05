@@ -16,19 +16,19 @@ import com.newsblur.util.FeedUtils
 import com.newsblur.util.PrefsUtils
 import com.newsblur.util.UIUtils
 import com.newsblur.util.executeAsyncTask
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ProfileDetailsFragment : Fragment() {
+
+    @Inject
+    lateinit var apiManager: APIManager
 
     private var user: UserDetails? = null
     private var viewingSelf = false
 
-    private lateinit var apiManager: APIManager
     private lateinit var binding: FragmentProfiledetailsBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        apiManager = APIManager(requireContext())
-    }
 
     fun setUser(context: Context, user: UserDetails?, viewingSelf: Boolean) {
         this.user = user

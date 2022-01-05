@@ -15,8 +15,14 @@ import com.newsblur.network.APIManager
 import com.newsblur.util.PrefsUtils
 import com.newsblur.util.UIUtils
 import com.newsblur.util.executeAsyncTask
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LoginAsDialogFragment : DialogFragment() {
+
+    @Inject
+    lateinit var apiManager: APIManager
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireActivity())
@@ -27,7 +33,6 @@ class LoginAsDialogFragment : DialogFragment() {
 
         builder.setView(binding.root)
         builder.setPositiveButton(R.string.alert_dialog_ok) { _, _ ->
-            val apiManager = APIManager(requireActivity())
             val username = binding.usernameField.text.toString()
             lifecycleScope.executeAsyncTask(
                     doInBackground = {

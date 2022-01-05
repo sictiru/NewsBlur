@@ -59,6 +59,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
 /**
  * A background service to handle synchronisation with the NB servers.
  *
@@ -74,6 +78,7 @@ import java.util.concurrent.TimeUnit;
  * after sync operations are performed.  Activities can then refresh views and
  * query this class to see if progress indicators should be active.
  */
+@AndroidEntryPoint
 public class NBSyncService extends JobService {
 
     private static final Object COMPLETION_CALLBACKS_MUTEX = new Object();
@@ -147,6 +152,7 @@ public class NBSyncService extends JobService {
     ImagePrefetchService imagePrefetchService;
     private boolean forceHalted = false;
 
+    @Inject
 	APIManager apiManager;
     BlurDatabaseHelper dbHelper;
     FileCache iconCache;
@@ -171,7 +177,6 @@ public class NBSyncService extends JobService {
      */
     private void finishConstruction() {
         if ((apiManager == null) || (dbHelper == null)) {
-            apiManager = new APIManager(this);
             dbHelper = new BlurDatabaseHelper(this);
             iconCache = FileCache.asIconCache(this);
             cleanupService = new CleanupService(this);

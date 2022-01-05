@@ -26,14 +26,19 @@ import com.newsblur.util.AppConstants
 import com.newsblur.util.FeedUtils
 import com.newsblur.util.UIUtils
 import com.newsblur.util.executeAsyncTask
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AddFeedFragment : DialogFragment() {
+
+    @Inject
+    lateinit var apiManager: APIManager
 
     private lateinit var binding: DialogAddFeedBinding
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val apiManager = APIManager(requireContext())
         val v = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_feed, null)
         binding = DialogAddFeedBinding.bind(v)
 

@@ -35,10 +35,17 @@ import com.newsblur.service.NBSyncReceiver.Companion.UPDATE_TEXT
 import com.newsblur.service.OriginalTextService
 import com.newsblur.util.*
 import com.newsblur.util.PrefConstants.ThemeValue
+import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 import java.util.regex.Pattern
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
+@AndroidEntryPoint
 class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
+
+    @Inject
+    lateinit var apiManager: APIManager
 
     @JvmField
     var story: Story? = null
@@ -692,7 +699,6 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
                         binding.readingStoryChanges.setText(R.string.story_changes_loading)
                     },
                     doInBackground = {
-                        val apiManager = APIManager(requireContext())
                         apiManager.getStoryChanges(story.storyHash, showChanges)
                     },
                     onPostExecute = { response ->

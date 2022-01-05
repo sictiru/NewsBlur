@@ -15,11 +15,17 @@ import com.newsblur.fragment.AddFeedFragment
 import com.newsblur.fragment.AddFeedFragment.AddFeedProgressListener
 import com.newsblur.network.APIManager
 import com.newsblur.util.executeAsyncTask
+import dagger.hilt.android.AndroidEntryPoint
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class FeedSearchActivity : NbActivity(), OnFeedSearchResultClickListener, AddFeedProgressListener {
+
+    @Inject
+    lateinit var apiManager: APIManager
 
     private val supportedUrlProtocols: MutableSet<String> = HashSet(2)
 
@@ -30,7 +36,6 @@ class FeedSearchActivity : NbActivity(), OnFeedSearchResultClickListener, AddFee
 
     private lateinit var adapter: FeedSearchAdapter
     private lateinit var binding: ActivityFeedSearchBinding
-    private lateinit var apiManager: APIManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +43,6 @@ class FeedSearchActivity : NbActivity(), OnFeedSearchResultClickListener, AddFee
         setContentView(binding.root)
         setupViews()
         setupListeners()
-        apiManager = APIManager(this)
         binding.inputSearchQuery.requestFocus()
     }
 

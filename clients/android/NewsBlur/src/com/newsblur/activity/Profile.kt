@@ -11,8 +11,14 @@ import com.newsblur.network.APIManager
 import com.newsblur.util.PrefsUtils
 import com.newsblur.util.UIUtils
 import com.newsblur.util.executeAsyncTask
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class Profile : NbActivity() {
+
+    @Inject
+    lateinit var apiManager: APIManager
 
     private val detailsTag = "details"
     private var detailsFragment: ProfileDetailsFragment? = null
@@ -20,7 +26,6 @@ class Profile : NbActivity() {
     private var userId: String? = null
 
     private lateinit var binding: ActivityProfileBinding
-    private lateinit var apiManager: APIManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +33,6 @@ class Profile : NbActivity() {
         setContentView(binding.root)
         UIUtils.setupToolbar(this, R.drawable.logo, getString(R.string.profile), true)
 
-        apiManager = APIManager(this)
         userId = if (savedInstanceState == null) {
             intent.getStringExtra(USER_ID)
         } else {

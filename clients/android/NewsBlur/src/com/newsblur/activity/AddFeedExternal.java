@@ -14,6 +14,9 @@ import com.newsblur.fragment.AddFeedFragment;
 import com.newsblur.util.UIUtils;
 import com.newsblur.util.ViewUtils;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class AddFeedExternal extends NbActivity implements AddFeedFragment.AddFeedProgressListener {
 
     private ActivityAddfeedexternalBinding binding;
