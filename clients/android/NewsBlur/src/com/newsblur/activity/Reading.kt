@@ -32,9 +32,11 @@ import com.newsblur.util.*
 import com.newsblur.util.PrefConstants.ThemeValue
 import com.newsblur.view.ReadingScrollView.ScrollChangeListener
 import com.newsblur.viewModel.StoriesViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import java.lang.Runnable
 import kotlin.math.abs
 
+@AndroidEntryPoint
 abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeListener,
         ScrollChangeListener, ReadingFontChangedListener {
 

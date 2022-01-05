@@ -9,6 +9,7 @@ import com.google.gson.reflect.TypeToken
 import com.newsblur.domain.Classifier
 import com.newsblur.domain.Feed
 import com.newsblur.domain.Story
+import com.newsblur.network.APIConstants
 import com.newsblur.network.APIManager
 import com.newsblur.serialization.BooleanTypeAdapter
 import com.newsblur.serialization.ClassifierMapTypeAdapter
@@ -16,6 +17,7 @@ import com.newsblur.serialization.DateStringTypeAdapter
 import com.newsblur.serialization.FeedListTypeAdapter
 import com.newsblur.serialization.StoryTypeAdapter
 import com.newsblur.util.AppConstants
+import com.newsblur.util.NetworkUtils
 import com.newsblur.util.PrefConstants
 import dagger.Module
 import dagger.Provides
@@ -61,17 +63,7 @@ object NetworkModule {
     @Provides
     fun provideCustomUserAgent(sharedPreferences: SharedPreferences): CustomUserAgent {
         val appVersion: String = sharedPreferences.getString(AppConstants.LAST_APP_VERSION, "unknown_version")!!
-        return StringBuilder().apply {
-            append("NewsBlur Android app (")
-            append(Build.MANUFACTURER)
-            append(" ")
-            append(Build.MODEL)
-            append(" ")
-            append(Build.VERSION.RELEASE)
-            append(" ")
-            append(appVersion) //TODO this could be stale. update at runtime
-            append(")")
-        }.toString()
+        return NetworkUtils.getCustomUserAgent(appVersion)
     }
 
     @Singleton

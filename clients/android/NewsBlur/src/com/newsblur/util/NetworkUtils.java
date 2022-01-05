@@ -3,6 +3,7 @@ package com.newsblur.util;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,6 +66,18 @@ public class NetworkUtils {
             android.util.Log.wtf("device does not support UTF-8", ueex);
             return null;
         }
+    }
+
+    public static String getCustomUserAgent(String appVersion) {
+        return "NewsBlur Android app (" +
+                Build.MANUFACTURER +
+                " " +
+                Build.MODEL +
+                " " +
+                Build.VERSION.RELEASE +
+                " " +
+                appVersion +
+                ")";
     }
 
 }

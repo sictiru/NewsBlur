@@ -361,7 +361,11 @@ public class NBSyncService extends JobService {
                 // v61+ is widely deployed
                 FileCache.cleanUpOldCache1(this);
                 FileCache.cleanUpOldCache2(this);
-                PrefsUtils.updateVersion(this);
+                String appVersion = PrefsUtils.getVersion(this);
+                PrefsUtils.updateVersion(this, appVersion);
+                // update user agent on api calls with latest app version
+                String customUserAgent = NetworkUtils.getCustomUserAgent(appVersion);
+                apiManager.updateCustomUserAgent(customUserAgent);
             }
 
             boolean autoVac = PrefsUtils.isTimeToVacuum(this);

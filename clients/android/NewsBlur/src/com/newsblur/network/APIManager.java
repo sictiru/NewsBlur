@@ -55,8 +55,8 @@ public class APIManager {
 
 	private final Context context;
 	private final Gson gson;
-    private final String customUserAgent;
 	private final OkHttpClient httpClient;
+    private String customUserAgent;
 
 	public APIManager(final Context context, Gson gson, String customUserAgent, OkHttpClient httpClient) {
         APIConstants.setCustomServer(PrefsUtils.getCustomServer(context));
@@ -652,6 +652,10 @@ public class APIManager {
         return response.getResponse(gson, NewsBlurResponse.class);
     }
 
+    public void updateCustomUserAgent(String customUserAgent) {
+        this.customUserAgent = customUserAgent;
+    }
+
     /* HTTP METHODS */
    
 	private APIResponse get(final String urlString) {
@@ -766,5 +770,4 @@ public class APIManager {
             com.newsblur.util.Log.w(this.getClass().getName(), "Abandoning API backoff due to interrupt.");
         }
     }
-
 }

@@ -87,10 +87,10 @@ public class PrefsUtils {
 
     }
 
-    public static void updateVersion(Context context) {
+    public static void updateVersion(Context context, String appVersion) {
         SharedPreferences prefs = context.getSharedPreferences(PrefConstants.PREFERENCES, 0);
         // store the current version
-        prefs.edit().putString(AppConstants.LAST_APP_VERSION, getVersion(context)).commit();
+        prefs.edit().putString(AppConstants.LAST_APP_VERSION, appVersion).commit();
         // also make sure we auto-trigger an update, since all data are now gone
         prefs.edit().putLong(AppConstants.LAST_SYNC_TIME, 0L).commit();
     }
