@@ -37,11 +37,6 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideSharedPrefs(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences(PrefConstants.PREFERENCES, Context.MODE_PRIVATE)
-
-    @Singleton
-    @Provides
     fun provideGson(): Gson = GsonBuilder().apply {
         registerTypeAdapter(Date::class.java, DateStringTypeAdapter())
         registerTypeAdapter(Boolean::class.java, BooleanTypeAdapter())

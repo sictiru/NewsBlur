@@ -154,6 +154,8 @@ public class NBSyncService extends JobService {
 
     @Inject
 	APIManager apiManager;
+
+    @Inject
     BlurDatabaseHelper dbHelper;
     FileCache iconCache;
 
@@ -176,8 +178,7 @@ public class NBSyncService extends JobService {
      * parts of construction in onCreate, but save them for when we are in our own thread.
      */
     private void finishConstruction() {
-        if ((apiManager == null) || (dbHelper == null)) {
-            dbHelper = new BlurDatabaseHelper(this);
+        if ((iconCache == null) || (cleanupService == null)) {
             iconCache = FileCache.asIconCache(this);
             cleanupService = new CleanupService(this);
             starredService = new StarredService(this);
@@ -1230,10 +1231,6 @@ public class NBSyncService extends JobService {
                     primaryExecutor.shutdownNow();
                     Thread.currentThread().interrupt();
                 }
-            }
-            if (dbHelper != null) {
-                dbHelper.close();
-                dbHelper = null;
             }
             com.newsblur.util.Log.d(this, "onDestroy done");
         } catch (Exception ex) {

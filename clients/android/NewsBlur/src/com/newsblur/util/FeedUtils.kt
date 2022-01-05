@@ -39,6 +39,8 @@ object FeedUtils {
 
     var storyImageCache: FileCache? = null
 
+    var apiManager: APIManager? = null
+
     // this is gross, but the feedset can't hold a folder title
     // without being mistaken for a folder feed.
     // The alternative is to pass it through alongside all instances
@@ -48,8 +50,13 @@ object FeedUtils {
 
     @JvmStatic
     fun offerInitContext(context: Context) {
+        val hiltEntryPoint = EntryPointAccessors
+                .fromApplication(context, FeedUtilsEntryPoint::class.java)
+        if (apiManager == null) {
+            apiManager = hiltEntryPoint.apiManager()
+        }
         if (dbHelper == null) {
-            dbHelper = BlurDatabaseHelper(context.applicationContext)
+            dbHelper = hiltEntryPoint.dbHelper()
         }
         if (iconLoader == null) {
             iconLoader = ImageLoader.asIconLoader(context.applicationContext)
@@ -117,11 +124,9 @@ object FeedUtils {
 
     @JvmStatic
     fun deleteSavedSearch(feedId: String?, query: String?, context: Context) {
-        val hiltEntryPoint = EntryPointAccessors
-                .fromApplication(context, FeedUtilsEntryPoint::class.java)
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    hiltEntryPoint.apiManager().deleteSearch(feedId, query)
+                    apiManager!!.deleteSearch(feedId, query)
                 },
                 onPostExecute = { newsBlurResponse ->
                     if (!newsBlurResponse.isError) {
@@ -133,10 +138,10 @@ object FeedUtils {
     }
 
     @JvmStatic
-    fun saveSearch(feedId: String?, query: String?, context: Context, apiManager: APIManager) {
+    fun saveSearch(feedId: String?, query: String?, context: Context) {
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    apiManager.saveSearch(feedId, query)
+                    apiManager!!.saveSearch(feedId, query)
                 },
                 onPostExecute = { newsBlurResponse ->
                     if (!newsBlurResponse.isError) {
@@ -149,11 +154,9 @@ object FeedUtils {
 
     @JvmStatic
     fun deleteFeed(feedId: String?, folderName: String?, context: Context) {
-        val hiltEntryPoint = EntryPointAccessors
-                .fromApplication(context, FeedUtilsEntryPoint::class.java)
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    hiltEntryPoint.apiManager().deleteFeed(feedId, folderName)
+                    apiManager!!.deleteFeed(feedId, folderName)
                 },
                 onPostExecute = {
                     // TODO: we can't check result.isError() because the delete call sets the .message property on all calls. find a better error check
@@ -165,11 +168,9 @@ object FeedUtils {
 
     @JvmStatic
     fun deleteSocialFeed(userId: String?, context: Context) {
-        val hiltEntryPoint = EntryPointAccessors
-                .fromApplication(context, FeedUtilsEntryPoint::class.java)
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    hiltEntryPoint.apiManager().unfollowUser(userId)
+                    apiManager!!.unfollowUser(userId)
                 },
                 onPostExecute = {
                     // TODO: we can't check result.isError() because the delete call sets the .message property on all calls. find a better error check
@@ -180,10 +181,10 @@ object FeedUtils {
     }
 
     @JvmStatic
-    fun deleteFolder(folderName: String?, inFolder: String?, context: Context, apiManager: APIManager) {
+    fun deleteFolder(folderName: String?, inFolder: String?, context: Context) {
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    apiManager.deleteFolder(folderName, inFolder)
+                    apiManager!!.deleteFolder(folderName, inFolder)
                 },
                 onPostExecute = { result ->
                     if (!result.isError) {
@@ -202,10 +203,10 @@ object FeedUtils {
     }
 
     @JvmStatic
-    fun renameFolder(folderName: String?, newFolderName: String?, inFolder: String?, context: Context, apiManager: APIManager) {
+    fun renameFolder(folderName: String?, newFolderName: String?, inFolder: String?, context: Context) {
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    apiManager.renameFolder(folderName, newFolderName, inFolder)
+                    apiManager!!.renameFolder(folderName, newFolderName, inFolder)
                 },
                 onPostExecute = { result ->
                     if (!result.isError) {
@@ -500,11 +501,9 @@ object FeedUtils {
     @JvmStatic
     fun moveFeedToFolders(context: Context, feedId: String?, toFolders: Set<String?>, inFolders: Set<String?>?) {
         if (toFolders.isEmpty()) return
-        val hiltEntryPoint = EntryPointAccessors
-                .fromApplication(context, FeedUtilsEntryPoint::class.java)
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    hiltEntryPoint.apiManager().moveFeedToFolders(feedId, toFolders, inFolders)
+                    apiManager!!.moveFeedToFolders(feedId, toFolders, inFolders)
                 },
                 onPostExecute = {
                     NBSyncService.forceFeedsFolders()
@@ -625,4 +624,6 @@ object FeedUtils {
 @InstallIn(SingletonComponent::class)
 interface FeedUtilsEntryPoint {
     fun apiManager(): APIManager
+
+    fun dbHelper(): BlurDatabaseHelper
 }
