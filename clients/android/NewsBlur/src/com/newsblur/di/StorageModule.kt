@@ -3,12 +3,14 @@ package com.newsblur.di
 import android.content.Context
 import android.content.SharedPreferences
 import com.newsblur.database.BlurDatabaseHelper
+import com.newsblur.util.FileCache
 import com.newsblur.util.PrefConstants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -24,4 +26,22 @@ class StorageModule {
     @Provides
     fun provideBlurDbHelper(@ApplicationContext context: Context): BlurDatabaseHelper =
             BlurDatabaseHelper(context)
+
+    @Singleton
+    @Provides
+    @ImageFileCache
+    fun provideImageCache(@ApplicationContext context: Context): FileCache =
+            FileCache.asStoryImageCache(context)
+
+    @Singleton
+    @Provides
+    @IconFileCache
+    fun provideIconCache(@ApplicationContext context: Context): FileCache =
+            FileCache.asIconCache(context)
+
+    @Singleton
+    @Provides
+    @ThumbnailFileCache
+    fun provideThumbnailCache(@ApplicationContext context: Context): FileCache =
+            FileCache.asThumbnailCache(context)
 }

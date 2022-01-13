@@ -29,7 +29,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-typealias CustomUserAgent = String
+private typealias CustomUserAgent = String
 
 @Module
 @InstallIn(SingletonComponent::class)

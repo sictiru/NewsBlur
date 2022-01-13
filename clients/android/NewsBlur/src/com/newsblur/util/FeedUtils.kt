@@ -8,6 +8,8 @@ import com.newsblur.NbApplication
 import com.newsblur.R
 import com.newsblur.activity.NbActivity
 import com.newsblur.database.BlurDatabaseHelper
+import com.newsblur.di.IconLoader
+import com.newsblur.di.ThumbnailLoader
 import com.newsblur.domain.*
 import com.newsblur.fragment.ReadingActionConfirmationFragment
 import com.newsblur.network.APIConstants
@@ -37,8 +39,6 @@ object FeedUtils {
     @JvmField
     var thumbnailLoader: ImageLoader? = null
 
-    var storyImageCache: FileCache? = null
-
     var apiManager: APIManager? = null
 
     // this is gross, but the feedset can't hold a folder title
@@ -59,13 +59,10 @@ object FeedUtils {
             dbHelper = hiltEntryPoint.dbHelper()
         }
         if (iconLoader == null) {
-            iconLoader = ImageLoader.asIconLoader(context.applicationContext)
-        }
-        if (storyImageCache == null) {
-            storyImageCache = FileCache.asStoryImageCache(context.applicationContext)
+            iconLoader = hiltEntryPoint.iconLoader()
         }
         if (thumbnailLoader == null) {
-            thumbnailLoader = ImageLoader.asThumbnailLoader(context.applicationContext, storyImageCache)
+            thumbnailLoader = hiltEntryPoint.thumbnailLoader()
         }
     }
 
@@ -626,4 +623,10 @@ interface FeedUtilsEntryPoint {
     fun apiManager(): APIManager
 
     fun dbHelper(): BlurDatabaseHelper
+
+    @IconLoader
+    fun iconLoader(): ImageLoader
+
+    @ThumbnailLoader
+    fun thumbnailLoader(): ImageLoader
 }

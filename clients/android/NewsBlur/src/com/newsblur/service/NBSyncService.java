@@ -22,6 +22,7 @@ import static com.newsblur.service.NBSyncReceiver.UPDATE_STORY;
 import androidx.annotation.NonNull;
 
 import com.newsblur.database.DatabaseConstants;
+import com.newsblur.di.IconFileCache;
 import com.newsblur.domain.Feed;
 import com.newsblur.domain.Folder;
 import com.newsblur.domain.SavedSearch;
@@ -157,6 +158,9 @@ public class NBSyncService extends JobService {
 
     @Inject
     BlurDatabaseHelper dbHelper;
+
+    @IconFileCache
+    @Inject
     FileCache iconCache;
 
     /** The time of the last hard API failure we encountered. Used to implement back-off so that the sync
@@ -178,8 +182,7 @@ public class NBSyncService extends JobService {
      * parts of construction in onCreate, but save them for when we are in our own thread.
      */
     private void finishConstruction() {
-        if ((iconCache == null) || (cleanupService == null)) {
-            iconCache = FileCache.asIconCache(this);
+        if (cleanupService == null || imagePrefetchService == null) {
             cleanupService = new CleanupService(this);
             starredService = new StarredService(this);
             originalTextService = new OriginalTextService(this);

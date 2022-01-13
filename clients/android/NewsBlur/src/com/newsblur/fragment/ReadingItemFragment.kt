@@ -24,6 +24,7 @@ import com.newsblur.activity.FeedItemsList
 import com.newsblur.activity.Reading
 import com.newsblur.databinding.FragmentReadingitemBinding
 import com.newsblur.databinding.ReadingItemActionsBinding
+import com.newsblur.di.ImageFileCache
 import com.newsblur.domain.Classifier
 import com.newsblur.domain.Story
 import com.newsblur.domain.UserDetails
@@ -46,6 +47,10 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
 
     @Inject
     lateinit var apiManager: APIManager
+
+    @ImageFileCache
+    @Inject
+    lateinit var storyImageCache: FileCache
 
     @JvmField
     var story: Story? = null
@@ -819,7 +824,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
         val imageTagMatcher = imgSniff.matcher(html)
         while (imageTagMatcher.find()) {
             val url = imageTagMatcher.group(2)
-            val localPath = FeedUtils.storyImageCache!!.getCachedLocation(url) ?: continue
+            val localPath = storyImageCache.getCachedLocation(url) ?: continue
             html = html.replace(imageTagMatcher.group(1) + "\"" + url + "\"", "src=\"$localPath\"")
             imageUrlRemaps!![localPath] = url
         }
