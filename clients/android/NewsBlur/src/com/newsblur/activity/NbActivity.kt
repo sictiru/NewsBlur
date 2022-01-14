@@ -1,20 +1,21 @@
 package com.newsblur.activity
 
 import android.content.IntentFilter
-import com.newsblur.util.FeedUtils.offerInitContext
-import com.newsblur.util.FeedUtils.triggerSync
 import androidx.appcompat.app.AppCompatActivity
 import com.newsblur.util.PrefConstants.ThemeValue
 import android.os.Bundle
 import com.newsblur.util.PrefsUtils
 import com.newsblur.util.UIUtils
 import com.newsblur.service.NBSyncReceiver
+import com.newsblur.util.FeedUtils
 import com.newsblur.util.Log
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * The base class for all Activities in the NewsBlur app.  Handles enforcement of
  * login state and tracking of sync/update broadcasts.
  */
+@AndroidEntryPoint
 open class NbActivity : AppCompatActivity() {
 
     private var uniqueLoginKey: String? = null
@@ -46,7 +47,7 @@ open class NbActivity : AppCompatActivity() {
             PrefsUtils.logout(this)
             finish()
         }
-
+        
         bundle?.let {
             uniqueLoginKey = it.getString(UNIQUE_LOGIN_KEY)
         }
@@ -99,7 +100,7 @@ open class NbActivity : AppCompatActivity() {
      * Pokes the sync service to perform any pending sync actions.
      */
     protected fun triggerSync() {
-        triggerSync(this)
+        FeedUtils.triggerSync(this)
     }
 
     /**

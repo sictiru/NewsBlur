@@ -19,6 +19,7 @@ import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.newsblur.R
+import com.newsblur.database.BlurDatabaseHelper
 import com.newsblur.database.ReadingAdapter
 import com.newsblur.databinding.ActivityReadingBinding
 import com.newsblur.domain.Story
@@ -34,11 +35,19 @@ import com.newsblur.view.ReadingScrollView.ScrollChangeListener
 import com.newsblur.viewModel.StoriesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.Runnable
+import java.util.*
+import javax.inject.Inject
 import kotlin.math.abs
 
 @AndroidEntryPoint
 abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeListener,
         ScrollChangeListener, ReadingFontChangedListener {
+
+    @Inject
+    lateinit var dbHelper: BlurDatabaseHelper
+
+    @Inject
+    lateinit var feedUtils: FeedUtils
 
     @JvmField
     var fs: FeedSet? = null
@@ -151,7 +160,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
         // this is not strictly necessary, since our first refresh with the fs will swap in
         // the correct session, but that can be delayed by sync backup, so we try here to
         // reduce UI lag, or in case somehow we got redisplayed in a zero-story state
-        FeedUtils.prepareReadingSession(fs, false)
+        feedUtils.prepareReadingSession(fs, false)
     }
 
     override fun onPause() {
@@ -218,7 +227,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
     }
 
     private fun setCursorData(cursor: Cursor) {
-        if (!FeedUtils.dbHelper!!.isFeedSetReady(fs)) {
+        if (!dbHelper.isFeedSetReady(fs)) {
             com.newsblur.util.Log.i(this.javaClass.name, "stale load")
             // the system can and will re-use activities, so during the initial mismatch of
             // data, don't show the old stories
@@ -319,7 +328,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
         if (fs!!.isSingleNormal) showFeedMetadata = false
         var sourceUserId: String? = null
         if (fs!!.singleSocialFeed != null) sourceUserId = fs!!.singleSocialFeed.key
-        readingAdapter = ReadingAdapter(childFragmentManager, sourceUserId, showFeedMetadata, this)
+        readingAdapter = ReadingAdapter(childFragmentManager, sourceUserId, showFeedMetadata, this, dbHelper)
 
         pager.adapter = readingAdapter
 
@@ -341,7 +350,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
         get() {
             // saved stories and global shared stories don't have unreads
             if (fs!!.isAllSaved || fs!!.isGlobalShared) return 0
-            val result = FeedUtils.dbHelper!!.getUnreadCount(fs, intelState)
+            val result = dbHelper.getUnreadCount(fs, intelState)
             return if (result < 0) 0 else result
         }
 
@@ -397,7 +406,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
                                 }
                             }
                             if (isMarkStoryReadImmediately) {
-                                FeedUtils.markStoryAsRead(story, this@Reading)
+                                feedUtils.markStoryAsRead(story, this@Reading)
                             }
                         }
                         checkStoryCount(position)
@@ -714,7 +723,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
     private fun overlaySendClick() {
         if (readingAdapter == null || pager == null) return
         val story = readingAdapter!!.getStory(pager!!.currentItem)
-        FeedUtils.sendStoryUrl(story, this)
+        feedUtils.sendStoryUrl(story, this)
     }
 
     private fun overlayTextClick() {

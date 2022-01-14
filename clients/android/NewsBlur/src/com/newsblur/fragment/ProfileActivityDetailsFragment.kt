@@ -29,6 +29,9 @@ abstract class ProfileActivityDetailsFragment : Fragment(), OnItemClickListener 
     @Inject
     lateinit var apiManager: APIManager
 
+    @Inject
+    lateinit var feedUtils: FeedUtils
+
     private lateinit var binding: FragmentProfileactivityBinding
     private lateinit var footerBinding: RowLoadingThrobberBinding
 
@@ -115,7 +118,7 @@ abstract class ProfileActivityDetailsFragment : Fragment(), OnItemClickListener 
             i.putExtra(Profile.USER_ID, activity.withUserId)
             context.startActivity(i)
         } else if (activity.category == ActivityDetails.Category.FEED_SUBSCRIPTION) {
-            val feed = FeedUtils.getFeed(activity.feedId)
+            val feed = feedUtils.getFeed(activity.feedId)
             if (feed == null) {
                 Toast.makeText(context, R.string.profile_feed_not_available, Toast.LENGTH_SHORT).show()
             } else {
@@ -132,7 +135,7 @@ abstract class ProfileActivityDetailsFragment : Fragment(), OnItemClickListener 
         } else if (isSocialFeedCategory(activity)) {
             // Strip the social: prefix from feedId
             val socialFeedId = activity.feedId.substring(7)
-            val feed = FeedUtils.getSocialFeed(socialFeedId)
+            val feed = feedUtils.getSocialFeed(socialFeedId)
             if (feed == null) {
                 Toast.makeText(context, R.string.profile_do_not_follow, Toast.LENGTH_SHORT).show()
             } else {

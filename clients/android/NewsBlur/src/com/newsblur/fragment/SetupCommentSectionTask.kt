@@ -54,7 +54,7 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
 
     private fun doInBackground() {
         if (context == null || story == null) return
-        comments = FeedUtils.dbHelper!!.getComments(story.id)
+        comments = fragment.dbHelper.getComments(story.id)
         topCommentViews = ArrayList()
         topShareViews = ArrayList()
         publicCommentViews = ArrayList()
@@ -70,7 +70,7 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
             if (!comment.byFriend && !PrefsUtils.showPublicComments(context)) {
                 continue
             }
-            val commentUser = FeedUtils.dbHelper!!.getUserProfile(comment.userId)
+            val commentUser = fragment.dbHelper.getUserProfile(comment.userId)
             // rarely, we get a comment but never got the user's profile, so we can't display it
             if (commentUser == null) {
                 Log.w(this.javaClass.name, "cannot display comment from missing user ID: " + comment.userId)
@@ -94,9 +94,9 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
                 }
                 for (id in comment.likingUsers) {
                     val favouriteImage = RoundedImageView(context)
-                    val user = FeedUtils.dbHelper!!.getUserProfile(id)
+                    val user = fragment.dbHelper.getUserProfile(id)
                     if (user != null) {
-                        FeedUtils.iconLoader!!.displayImage(user.photoUrl, favouriteImage)
+                        fragment.iconLoader.displayImage(user.photoUrl, favouriteImage)
                         favouriteContainer.addView(favouriteImage)
                     }
                 }
@@ -107,9 +107,9 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
                 } else {
                     favouriteIcon.setOnClickListener {
                         if (!mutableListOf<String>(*comment.likingUsers).contains(user.id)) {
-                            FeedUtils.likeComment(story, comment.userId, context)
+                            fragment.feedUtils.likeComment(story, comment.userId, context)
                         } else {
-                            FeedUtils.unlikeComment(story, comment.userId, context)
+                            fragment.feedUtils.unlikeComment(story, comment.userId, context)
                         }
                     }
                 }
@@ -118,22 +118,22 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
                 replyIcon.visibility = View.INVISIBLE
             } else {
                 replyIcon.setOnClickListener {
-                    val user = FeedUtils.dbHelper!!.getUserProfile(comment.userId)
+                    val user = fragment.dbHelper.getUserProfile(comment.userId)
                     if (user != null) {
                         val newFragment: DialogFragment = ReplyDialogFragment.newInstance(story, comment.userId, user.username)
                         newFragment.show(manager, "dialog")
                     }
                 }
             }
-            val replies = FeedUtils.dbHelper!!.getCommentReplies(comment.id)
+            val replies = fragment.dbHelper.getCommentReplies(comment.id)
             for (reply in replies) {
                 val replyView = inflater.inflate(R.layout.include_reply, null)
                 val replyText = replyView.findViewById<View>(R.id.reply_text) as TextView
                 replyText.text = UIUtils.fromHtml(reply.text)
                 val replyImage = replyView.findViewById<View>(R.id.reply_user_image) as RoundedImageView
-                val replyUser = FeedUtils.dbHelper!!.getUserProfile(reply.userId)
+                val replyUser = fragment.dbHelper.getUserProfile(reply.userId)
                 if (replyUser != null) {
-                    FeedUtils.iconLoader!!.displayImage(replyUser.photoUrl, replyImage)
+                    fragment.iconLoader.displayImage(replyUser.photoUrl, replyImage)
                     replyImage.setOnClickListener {
                         val i = Intent(context, Profile::class.java)
                         i.putExtra(Profile.USER_ID, replyUser.userId)
@@ -176,13 +176,13 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
                 sourceUserImage.visibility = View.VISIBLE
                 usershareImage.visibility = View.VISIBLE
                 commentImage.visibility = View.INVISIBLE
-                val sourceUser = FeedUtils.dbHelper!!.getUserProfile(comment.sourceUserId)
+                val sourceUser = fragment.dbHelper.getUserProfile(comment.sourceUserId)
                 if (sourceUser != null) {
-                    FeedUtils.iconLoader!!.displayImage(sourceUser.photoUrl, sourceUserImage)
-                    FeedUtils.iconLoader!!.displayImage(userPhoto, usershareImage)
+                    fragment.iconLoader.displayImage(sourceUser.photoUrl, sourceUserImage)
+                    fragment.iconLoader.displayImage(userPhoto, usershareImage)
                 }
             } else {
-                FeedUtils.iconLoader!!.displayImage(userPhoto, commentImage)
+                fragment.iconLoader.displayImage(userPhoto, commentImage)
             }
             commentImage.setOnClickListener {
                 val i = Intent(context, Profile::class.java)
@@ -216,7 +216,7 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
 
         // now that we have all shares from the comments table and story object, populate the shares row
         for (userId in sharingUserIds) {
-            val user = FeedUtils.dbHelper!!.getUserProfile(userId)
+            val user = fragment.dbHelper.getUserProfile(userId)
             if (user == null) {
                 Log.w(this.javaClass.name, "cannot display share from missing user ID: $userId")
                 continue

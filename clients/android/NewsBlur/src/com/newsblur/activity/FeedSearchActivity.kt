@@ -10,10 +10,12 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.newsblur.activity.FeedSearchAdapter.OnFeedSearchResultClickListener
 import com.newsblur.databinding.ActivityFeedSearchBinding
+import com.newsblur.di.IconLoader
 import com.newsblur.domain.FeedResult
 import com.newsblur.fragment.AddFeedFragment
 import com.newsblur.fragment.AddFeedFragment.AddFeedProgressListener
 import com.newsblur.network.APIManager
+import com.newsblur.util.ImageLoader
 import com.newsblur.util.executeAsyncTask
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.MalformedURLException
@@ -26,6 +28,10 @@ class FeedSearchActivity : NbActivity(), OnFeedSearchResultClickListener, AddFee
 
     @Inject
     lateinit var apiManager: APIManager
+
+    @IconLoader
+    @Inject
+    lateinit var iconLoader: ImageLoader
 
     private val supportedUrlProtocols: MutableSet<String> = HashSet(2)
 
@@ -59,7 +65,7 @@ class FeedSearchActivity : NbActivity(), OnFeedSearchResultClickListener, AddFee
         supportActionBar?.setDisplayShowTitleEnabled(false)
         supportActionBar?.setDisplayShowHomeEnabled(false)
 
-        adapter = FeedSearchAdapter(this)
+        adapter = FeedSearchAdapter(this, iconLoader)
         binding.feedResultList.adapter = adapter
     }
 

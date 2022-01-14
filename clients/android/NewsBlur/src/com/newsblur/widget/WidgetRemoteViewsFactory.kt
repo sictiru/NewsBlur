@@ -11,18 +11,27 @@ import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService.RemoteViewsFactory
 import com.newsblur.R
+import com.newsblur.database.BlurDatabaseHelper
+import com.newsblur.di.IconLoader
+import com.newsblur.di.ThumbnailLoader
 import com.newsblur.domain.Feed
 import com.newsblur.domain.Story
 import com.newsblur.network.APIManager
 import com.newsblur.util.*
-import com.newsblur.util.FeedUtils.offerInitContext
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import java.util.*
 import kotlin.math.min
 
-class WidgetRemoteViewsFactory(context: Context, intent: Intent, apiManager: APIManager) : RemoteViewsFactory {
+class WidgetRemoteViewsFactory(context: Context, intent: Intent) : RemoteViewsFactory {
 
     private val context: Context
     private val apiManager: APIManager
+    private val dbHelper: BlurDatabaseHelper
+    private val iconLoader: ImageLoader
+    private val thumbnailLoader: ImageLoader
     private var fs: FeedSet? = null
     private val appWidgetId: Int
     private var dataCompleted = false
@@ -31,8 +40,13 @@ class WidgetRemoteViewsFactory(context: Context, intent: Intent, apiManager: API
 
     init {
         Log.d(TAG, "Constructor")
+        val hiltEntryPoint = EntryPointAccessors
+                .fromApplication(context.applicationContext, WidgetRemoteViewsFactoryEntryPoint::class.java)
         this.context = context
-        this.apiManager = apiManager //TODO TEST
+        this.apiManager = hiltEntryPoint.apiManager()
+        this.dbHelper = hiltEntryPoint.dbHelper()
+        this.iconLoader = hiltEntryPoint.iconLoader()
+        this.thumbnailLoader = hiltEntryPoint.thumbnailLoader()
         appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID)
     }
@@ -48,18 +62,6 @@ class WidgetRemoteViewsFactory(context: Context, intent: Intent, apiManager: API
      */
     override fun onCreate() {
         Log.d(TAG, "onCreate")
-        // widget could be created before app init
-        // wait for the dbHelper to be ready for use
-        while (FeedUtils.dbHelper == null) {
-            try {
-                Thread.sleep(500)
-            } catch (e: InterruptedException) {
-                e.printStackTrace()
-            }
-            if (FeedUtils.dbHelper == null) {
-                offerInitContext(context)
-            }
-        }
         WidgetUtils.enableWidgetUpdate(context)
     }
 
@@ -78,9 +80,9 @@ class WidgetRemoteViewsFactory(context: Context, intent: Intent, apiManager: API
         rv.setTextViewText(R.id.story_item_date, time)
 
         // image dimensions same as R.layout.view_widget_story_item
-        FeedUtils.iconLoader!!.displayWidgetImage(story.extern_faviconUrl, R.id.story_item_feedicon, UIUtils.dp2px(context, 19), rv)
+        iconLoader.displayWidgetImage(story.extern_faviconUrl, R.id.story_item_feedicon, UIUtils.dp2px(context, 19), rv)
         if (PrefsUtils.getThumbnailStyle(context) != ThumbnailStyle.OFF && !TextUtils.isEmpty(story.thumbnailUrl)) {
-            FeedUtils.thumbnailLoader!!.displayWidgetImage(story.thumbnailUrl, R.id.story_item_thumbnail, UIUtils.dp2px(context, 64), rv)
+            thumbnailLoader.displayWidgetImage(story.thumbnailUrl, R.id.story_item_thumbnail, UIUtils.dp2px(context, 64), rv)
         } else {
             rv.setViewVisibility(R.id.story_item_thumbnail, View.GONE)
         }
@@ -147,7 +149,7 @@ class WidgetRemoteViewsFactory(context: Context, intent: Intent, apiManager: API
             } else {
                 Log.d(TAG, "Fetched widget stories")
                 processStories(response.stories)
-                FeedUtils.dbHelper!!.insertStories(response, true)
+                dbHelper.insertStories(response, true)
             }
         }
     }
@@ -173,7 +175,7 @@ class WidgetRemoteViewsFactory(context: Context, intent: Intent, apiManager: API
         val feedMap = HashMap<String, Feed>()
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    FeedUtils.dbHelper!!.getFeedsCursor(cancellationSignal)
+                    dbHelper.getFeedsCursor(cancellationSignal)
                 },
                 onPostExecute = {
                     while (it != null && it.moveToNext()) {
@@ -227,5 +229,20 @@ class WidgetRemoteViewsFactory(context: Context, intent: Intent, apiManager: API
 
     companion object {
         private const val TAG = "WidgetRemoteViewsFactory"
+    }
+
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface WidgetRemoteViewsFactoryEntryPoint {
+
+        fun apiManager(): APIManager
+
+        fun dbHelper(): BlurDatabaseHelper
+
+        @IconLoader
+        fun iconLoader(): ImageLoader
+
+        @ThumbnailLoader
+        fun thumbnailLoader(): ImageLoader
     }
 }

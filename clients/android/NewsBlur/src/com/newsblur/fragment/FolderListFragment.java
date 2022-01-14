@@ -58,11 +58,19 @@ import com.newsblur.util.StateFilter;
 import com.newsblur.util.UIUtils;
 import com.newsblur.viewModel.AllFoldersViewModel;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class FolderListFragment extends NbFragment implements OnCreateContextMenuListener, 
                                                               OnChildClickListener,
                                                               OnGroupClickListener,
                                                               OnGroupCollapseListener,
                                                               OnGroupExpandListener {
+
+    @Inject
+    FeedUtils feedUtils;
 
     private AllFoldersViewModel allFoldersViewModel;
 	private FolderListAdapter adapter;
