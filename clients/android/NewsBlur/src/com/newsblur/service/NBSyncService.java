@@ -964,7 +964,7 @@ public class NBSyncService extends JobService {
 
         Cursor cFocus = dbHelper.getNotifyFocusStoriesCursor();
         Cursor cUnread = dbHelper.getNotifyUnreadStoriesCursor();
-        NotificationUtils.notifyStories(cFocus, cUnread, this, iconCache);
+        NotificationUtils.notifyStories(this, cFocus, cUnread, iconCache, dbHelper);
         closeQuietly(cFocus);
         closeQuietly(cUnread);
     }
