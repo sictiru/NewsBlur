@@ -6,8 +6,10 @@ import android.view.MenuItem
 import androidx.lifecycle.lifecycleScope
 import com.newsblur.R
 import com.newsblur.databinding.ActivityProfileBinding
+import com.newsblur.di.IconLoader
 import com.newsblur.fragment.ProfileDetailsFragment
 import com.newsblur.network.APIManager
+import com.newsblur.util.ImageLoader
 import com.newsblur.util.PrefsUtils
 import com.newsblur.util.UIUtils
 import com.newsblur.util.executeAsyncTask
@@ -19,6 +21,10 @@ class Profile : NbActivity() {
 
     @Inject
     lateinit var apiManager: APIManager
+
+    @Inject
+    @IconLoader
+    lateinit var iconLoader: ImageLoader
 
     private val detailsTag = "details"
     private var detailsFragment: ProfileDetailsFragment? = null
@@ -88,7 +94,7 @@ class Profile : NbActivity() {
                 onPostExecute = { userDetails ->
                     if (userDetails != null && detailsFragment != null && activityDetailsPagerAdapter != null) {
                         detailsFragment!!.setUser(this, userDetails, TextUtils.isEmpty(userId))
-                        activityDetailsPagerAdapter!!.setUser(userDetails)
+                        activityDetailsPagerAdapter!!.setUser(userDetails, iconLoader)
                     }
                 }
         )

@@ -43,8 +43,10 @@ import com.newsblur.activity.NbActivity;
 import com.newsblur.activity.ReadStoriesItemsList;
 import com.newsblur.activity.SavedStoriesItemsList;
 import com.newsblur.activity.SocialFeedItemsList;
+import com.newsblur.database.BlurDatabaseHelper;
 import com.newsblur.database.FolderListAdapter;
 import com.newsblur.databinding.FragmentFolderfeedlistBinding;
+import com.newsblur.di.IconLoader;
 import com.newsblur.domain.Feed;
 import com.newsblur.domain.Folder;
 import com.newsblur.domain.SavedSearch;
@@ -52,10 +54,10 @@ import com.newsblur.domain.SocialFeed;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.FeedUtils;
+import com.newsblur.util.ImageLoader;
 import com.newsblur.util.PrefConstants;
 import com.newsblur.util.PrefsUtils;
 import com.newsblur.util.StateFilter;
-import com.newsblur.util.UIUtils;
 import com.newsblur.viewModel.AllFoldersViewModel;
 
 import javax.inject.Inject;
@@ -71,6 +73,13 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
 
     @Inject
     FeedUtils feedUtils;
+
+    @Inject
+    BlurDatabaseHelper dbHelper;
+
+    @Inject
+    @IconLoader
+    ImageLoader iconLoader;
 
     private AllFoldersViewModel allFoldersViewModel;
 	private FolderListAdapter adapter;
@@ -88,7 +97,7 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
 		super.onCreate(savedInstanceState);
 		allFoldersViewModel = new ViewModelProvider(this).get(AllFoldersViewModel.class);
         currentState = PrefsUtils.getStateFilter(getActivity());
-		adapter = new FolderListAdapter(getActivity(), currentState);
+		adapter = new FolderListAdapter(getActivity(), currentState, iconLoader, dbHelper);
         sharedPreferences = getActivity().getSharedPreferences(PrefConstants.PREFERENCES, 0);
         feedUtils.currentFolderName = null;
         // NB: it is by design that loaders are not started until we get a
@@ -563,7 +572,7 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
         } else if (feedId.startsWith("river:")) {
             intent = new Intent(getActivity(), FolderItemsList.class);
             String folderName = feedId.replace("river:", "");
-            fs = feedUtils.feedSetFromFolderName(folderName);
+            fs = dbHelper.feedSetFromFolderName(folderName);
             intent.putExtra(FolderItemsList.EXTRA_FOLDER_NAME, folderName);
         } else if (feedId.equals("read")) {
             intent = new Intent(getActivity(), ReadStoriesItemsList.class);

@@ -4,28 +4,23 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
-import com.newsblur.NbApplication
 import com.newsblur.R
 import com.newsblur.activity.NbActivity
 import com.newsblur.database.BlurDatabaseHelper
-import com.newsblur.di.IconLoader
-import com.newsblur.di.ThumbnailLoader
 import com.newsblur.domain.*
 import com.newsblur.fragment.ReadingActionConfirmationFragment
 import com.newsblur.network.APIConstants
 import com.newsblur.network.APIManager
 import com.newsblur.service.NBSyncService
-import com.newsblur.service.NBSyncReceiver
 import com.newsblur.service.NBSyncReceiver.Companion.UPDATE_METADATA
 import com.newsblur.service.NBSyncReceiver.Companion.UPDATE_SOCIAL
 import com.newsblur.service.NBSyncReceiver.Companion.UPDATE_STORY
+import com.newsblur.util.UIUtils.syncUpdateStatus
 import java.util.*
 
 class FeedUtils(
         private val dbHelper: BlurDatabaseHelper,
         private val apiManager: APIManager,
-        @IconLoader private var iconLoader: ImageLoader,
-        @ThumbnailLoader private var thumbnailLoader: ImageLoader
 ) {
 
     // this is gross, but the feedset can't hold a folder title
@@ -34,10 +29,6 @@ class FeedUtils(
     // of the feedset
     @JvmField
     var currentFolderName: String? = null
-
-    fun dropAndRecreateTables() {
-        dbHelper.dropAndRecreateTables()
-    }
 
     fun prepareReadingSession(fs: FeedSet?, resetFirst: Boolean) {
         NBScope.executeAsyncTask(
@@ -142,12 +133,6 @@ class FeedUtils(
                     }
                 }
         )
-    }
-
-    fun syncOfflineStories(context: Context) {
-        dbHelper.deleteStories()
-        NBSyncService.forceFeedsFolders()
-        triggerSync(context)
     }
 
     fun renameFolder(folderName: String?, newFolderName: String?, inFolder: String?, context: Context) {
@@ -283,10 +268,10 @@ class FeedUtils(
                     fs.folderName
                 }
                 fs.isSingleSocial -> {
-                    getSocialFeed(fs.singleSocialFeed.key)?.feedTitle ?: ""
+                    dbHelper.getSocialFeed(fs.singleSocialFeed.key)?.feedTitle ?: ""
                 }
                 else -> {
-                    getFeed(fs.singleFeed)?.title ?: ""
+                    dbHelper.getFeed(fs.singleFeed)?.title ?: ""
                 }
             }
             val dialog = ReadingActionConfirmationFragment.newInstance(ra, title, optionalOverrideMessage, choicesRid, finishAfter)
@@ -485,58 +470,22 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun feedSetFromFolderName(folderName: String): FeedSet =
-            FeedSet.folder(folderName, getFeedIdsRecursive(folderName))
-
-    private fun getFeedIdsRecursive(folderName: String): Set<String> {
-        val folder = dbHelper.getFolder(folderName) ?: return emptySet()
-        val feedIds: MutableSet<String> = HashSet(folder.feedIds.size)
-        for (id in folder.feedIds) feedIds.add(id)
-        for (child in folder.children) feedIds.addAll(getFeedIdsRecursive(child))
-        return feedIds
-    }
-
     fun getStoryText(hash: String?): String? = dbHelper.getStoryText(hash)
 
     fun getStoryContent(hash: String?): String? = dbHelper.getStoryContent(hash)
-
-    /**
-     * Infer the feed ID for a story from the story's hash.  Useful for APIs
-     * that takes a feed ID and story ID and only the story hash is known.
-     *
-     * TODO: this has a smell to it. can't all APIs just accept story hashes?
-     */
-    fun inferFeedId(storyHash: String?): String? {
-        val parts = TextUtils.split(storyHash, ":")
-        return if (parts.size != 2) null else parts[0]
-    }
 
     /**
      * Because story objects have to join on the feeds table to get feed metadata, there are times
      * where standalone stories are missing this info and it must be re-fetched.  This is costly
      * and should be avoided where possible.
      */
-    fun getFeedTitle(feedId: String?): String? = getFeed(feedId)?.title
+    fun getFeedTitle(feedId: String?): String? = dbHelper.getFeed(feedId)?.title
 
     fun getFeed(feedId: String?): Feed? = dbHelper.getFeed(feedId)
-
-    fun getSocialFeed(feedId: String?): SocialFeed? = dbHelper.getSocialFeed(feedId)
-
-    fun getStarredFeedByTag(feedId: String?): StarredCount? = dbHelper.getStarredFeedByTag(feedId)
 
     fun openStatistics(context: Context?, feedId: String) {
         val url = APIConstants.buildUrl(APIConstants.PATH_FEED_STATISTICS + feedId)
         UIUtils.handleUri(context, Uri.parse(url))
-    }
-
-    fun syncUpdateStatus(context: Context, updateType: Int) {
-        if (NbApplication.isAppForeground) {
-            Intent(NBSyncReceiver.NB_SYNC_ACTION).apply {
-                putExtra(NBSyncReceiver.NB_SYNC_UPDATE_TYPE, updateType)
-            }.also {
-                context.sendBroadcast(it)
-            }
-        }
     }
 
     companion object {
@@ -548,6 +497,18 @@ class FeedUtils(
             // code paths
             val i = Intent(context, NBSyncService::class.java)
             context.startService(i)
+        }
+
+        /**
+         * Infer the feed ID for a story from the story's hash.  Useful for APIs
+         * that takes a feed ID and story ID and only the story hash is known.
+         *
+         * TODO: this has a smell to it. can't all APIs just accept story hashes?
+         */
+        @JvmStatic
+        fun inferFeedId(storyHash: String?): String? {
+            val parts = TextUtils.split(storyHash, ":")
+            return if (parts.size != 2) null else parts[0]
         }
     }
 }

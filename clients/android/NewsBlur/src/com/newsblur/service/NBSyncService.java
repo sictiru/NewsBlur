@@ -529,7 +529,7 @@ public class NBSyncService extends JobService {
                 com.newsblur.util.Log.w(this.getClass().getName(), "Server ignored or rejected auth cookie.");
                 if (authFails >= AppConstants.MAX_API_TRIES) {
                     com.newsblur.util.Log.w(this.getClass().getName(), "too many auth fails, resetting cookie");
-                    PrefsUtils.logout(this);
+                    PrefsUtils.logout(this, dbHelper);
                 }
                 DoFeedsFolders = true;
                 return;
@@ -617,7 +617,7 @@ public class NBSyncService extends JobService {
             // saved searches table
             List<ContentValues> savedSearchesValues = new ArrayList<>();
             for (SavedSearch savedSearch : feedResponse.savedSearches) {
-                savedSearchesValues.add(savedSearch.getValues());
+                savedSearchesValues.add(savedSearch.getValues(dbHelper));
             }
             // the API vends the starred total as a different element, roll it into
             // the starred counts table using a special tag

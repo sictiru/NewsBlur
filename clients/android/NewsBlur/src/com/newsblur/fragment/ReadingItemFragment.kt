@@ -352,7 +352,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
             true
         }
         R.id.menu_go_to_feed -> {
-            FeedItemsList.startActivity(context, fs, feedUtils.getFeed(story!!.feedId), null)
+            FeedItemsList.startActivity(context, fs, dbHelper.getFeed(story!!.feedId), null)
             true
         }
         else -> {
@@ -411,7 +411,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
     }
 
     private fun setupItemCommentsAndShares() {
-        SetupCommentSectionTask(this, binding.root, layoutInflater, story).execute()
+        SetupCommentSectionTask(this, binding.root, layoutInflater, story, iconLoader).execute()
     }
 
     private fun setupItemMetadata() {

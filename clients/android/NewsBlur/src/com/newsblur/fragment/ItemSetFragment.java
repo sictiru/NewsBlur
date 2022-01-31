@@ -27,10 +27,13 @@ import com.newsblur.database.BlurDatabaseHelper;
 import com.newsblur.database.StoryViewAdapter;
 import com.newsblur.databinding.FragmentItemgridBinding;
 import com.newsblur.databinding.RowFleuronBinding;
+import com.newsblur.di.IconLoader;
+import com.newsblur.di.ThumbnailLoader;
 import com.newsblur.domain.Story;
 import com.newsblur.service.NBSyncService;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.FeedUtils;
+import com.newsblur.util.ImageLoader;
 import com.newsblur.util.PrefsUtils;
 import com.newsblur.util.ReadFilter;
 import com.newsblur.util.StoryListStyle;
@@ -52,6 +55,14 @@ public class ItemSetFragment extends NbFragment {
 
     @Inject
     BlurDatabaseHelper dbHelper;
+
+    @Inject
+    @IconLoader
+    ImageLoader iconLoader;
+
+    @Inject
+    @ThumbnailLoader
+    ImageLoader thumbnailLoader;
 
     private static final String BUNDLE_GRIDSTATE = "gridstate";
 
@@ -176,7 +187,7 @@ public class ItemSetFragment extends NbFragment {
             }
         });
 
-        adapter = new StoryViewAdapter(((NbActivity) getActivity()), this, getFeedSet(), listStyle);
+        adapter = new StoryViewAdapter(((NbActivity) getActivity()), this, getFeedSet(), listStyle, iconLoader, thumbnailLoader, feedUtils);
         adapter.addFooterView(footerView);
         adapter.addFooterView(fleuronBinding.getRoot());
         binding.itemgridfragmentGrid.setAdapter(adapter);

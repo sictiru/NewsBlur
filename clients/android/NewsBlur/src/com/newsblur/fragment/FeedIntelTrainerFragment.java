@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.newsblur.R;
+import com.newsblur.database.BlurDatabaseHelper;
 import com.newsblur.databinding.DialogTrainfeedBinding;
 import com.newsblur.domain.Classifier;
 import com.newsblur.domain.Feed;
@@ -23,7 +24,15 @@ import com.newsblur.util.FeedSet;
 import com.newsblur.util.FeedUtils;
 import com.newsblur.util.UIUtils;
 
+import javax.inject.Inject;
+
 public class FeedIntelTrainerFragment extends DialogFragment {
+
+    @Inject
+    FeedUtils feedUtils;
+
+    @Inject
+    BlurDatabaseHelper dbHelper;
 
     private Feed feed;
     private FeedSet fs;
@@ -44,7 +53,7 @@ public class FeedIntelTrainerFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         feed = (Feed) getArguments().getSerializable("feed");
         fs = (FeedSet) getArguments().getSerializable("feedset");
-        classifier = FeedUtils.dbHelper.getClassifierForFeed(feed.feedId);
+        classifier = dbHelper.getClassifierForFeed(feed.feedId);
 
         final Activity activity = getActivity();
         LayoutInflater inflater = LayoutInflater.from(activity);
@@ -62,7 +71,7 @@ public class FeedIntelTrainerFragment extends DialogFragment {
         if (classifier.title.size() < 1) binding.intelTitleHeader.setVisibility(View.GONE);
         
         // get the list of suggested tags
-        List<String> allTags = FeedUtils.dbHelper.getTagsForFeed(feed.feedId);
+        List<String> allTags = dbHelper.getTagsForFeed(feed.feedId);
         // augment that list with known trained tags
         for (Map.Entry<String, Integer> rule : classifier.tags.entrySet()) {
             if (!allTags.contains(rule.getKey())) {
@@ -79,7 +88,7 @@ public class FeedIntelTrainerFragment extends DialogFragment {
         if (allTags.size() < 1) binding.intelTagHeader.setVisibility(View.GONE);
 
         // get the list of suggested authors
-        List<String> allAuthors = FeedUtils.dbHelper.getAuthorsForFeed(feed.feedId);
+        List<String> allAuthors = dbHelper.getAuthorsForFeed(feed.feedId);
         // augment that list with known trained authors
         for (Map.Entry<String, Integer> rule : classifier.authors.entrySet()) {
             if (!allAuthors.contains(rule.getKey())) {
@@ -115,7 +124,7 @@ public class FeedIntelTrainerFragment extends DialogFragment {
         builder.setPositiveButton(R.string.dialog_story_intel_save, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                FeedUtils.updateClassifier(feed.feedId, classifier, fs, activity);
+                feedUtils.updateClassifier(feed.feedId, classifier, fs, activity);
                 FeedIntelTrainerFragment.this.dismiss();
             }
         });

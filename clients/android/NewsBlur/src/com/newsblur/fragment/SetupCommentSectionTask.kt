@@ -23,7 +23,7 @@ import com.newsblur.view.RoundedImageView
 import java.lang.ref.WeakReference
 import java.util.*
 
-class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: View, inflater: LayoutInflater, story: Story?) {
+class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: View, inflater: LayoutInflater, story: Story?, iconLoader: ImageLoader) {
 
     private var topCommentViews: ArrayList<View>? = null
     private var topShareViews: ArrayList<View>? = null
@@ -36,6 +36,7 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
     private val context: Context?
     private val user: UserDetails
     private val manager: FragmentManager
+    private val iconLoader: ImageLoader
     private var comments: MutableList<Comment>? = null
 
     /**
@@ -200,7 +201,7 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
 
             // for actual comments, also populate the upper icon bar
             if (!comment.isPseudo) {
-                val image = ViewUtils.createSharebarImage(context, commentUser.photoUrl, commentUser.userId)
+                val image = ViewUtils.createSharebarImage(context, commentUser.photoUrl, commentUser.userId, iconLoader)
                 topCommentViews!!.add(image)
                 commentingUserIds.add(comment.userId)
             }
@@ -221,7 +222,7 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
                 Log.w(this.javaClass.name, "cannot display share from missing user ID: $userId")
                 continue
             }
-            val image = ViewUtils.createSharebarImage(context, user.photoUrl, user.userId)
+            val image = ViewUtils.createSharebarImage(context, user.photoUrl, user.userId, iconLoader)
             topShareViews!!.add(image)
         }
     }
@@ -344,5 +345,6 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
         this.story = story
         viewHolder = WeakReference(view)
         user = PrefsUtils.getUserDetails(context)
+        this.iconLoader = iconLoader
     }
 }

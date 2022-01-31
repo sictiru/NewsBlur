@@ -16,10 +16,6 @@ class FeedModule {
 
     @Singleton
     @Provides
-    fun provideFeedUtils(
-            dbHelper: BlurDatabaseHelper,
-            apiManager: APIManager,
-            @IconLoader iconLoader: ImageLoader,
-            @ThumbnailLoader thumbnailLoader: ImageLoader
-    ) = FeedUtils(dbHelper, apiManager, iconLoader, thumbnailLoader)
+    fun provideFeedUtils(dbHelper: BlurDatabaseHelper, apiManager: APIManager) =
+            FeedUtils(dbHelper, apiManager)
 }

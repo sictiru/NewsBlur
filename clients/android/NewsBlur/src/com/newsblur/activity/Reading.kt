@@ -19,9 +19,9 @@ import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.newsblur.R
-import com.newsblur.database.BlurDatabaseHelper
 import com.newsblur.database.ReadingAdapter
 import com.newsblur.databinding.ActivityReadingBinding
+import com.newsblur.di.IconLoader
 import com.newsblur.domain.Story
 import com.newsblur.fragment.ReadingItemFragment
 import com.newsblur.fragment.ReadingPagerFragment
@@ -35,7 +35,6 @@ import com.newsblur.view.ReadingScrollView.ScrollChangeListener
 import com.newsblur.viewModel.StoriesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.Runnable
-import java.util.*
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -44,10 +43,11 @@ abstract class Reading : NbActivity(), OnPageChangeListener, OnSeekBarChangeList
         ScrollChangeListener, ReadingFontChangedListener {
 
     @Inject
-    lateinit var dbHelper: BlurDatabaseHelper
+    lateinit var feedUtils: FeedUtils
 
     @Inject
-    lateinit var feedUtils: FeedUtils
+    @IconLoader
+    lateinit var iconLoader: ImageLoader
 
     @JvmField
     var fs: FeedSet? = null

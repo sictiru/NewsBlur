@@ -13,8 +13,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.newsblur.R
 import com.newsblur.activity.Profile
+import com.newsblur.database.BlurDatabaseHelper
 import com.newsblur.databinding.FragmentProfileactivityBinding
 import com.newsblur.databinding.RowLoadingThrobberBinding
+import com.newsblur.di.IconLoader
 import com.newsblur.domain.ActivityDetails
 import com.newsblur.domain.UserDetails
 import com.newsblur.network.APIManager
@@ -30,7 +32,11 @@ abstract class ProfileActivityDetailsFragment : Fragment(), OnItemClickListener 
     lateinit var apiManager: APIManager
 
     @Inject
-    lateinit var feedUtils: FeedUtils
+    lateinit var dbHelper: BlurDatabaseHelper
+
+    @Inject
+    @IconLoader
+    lateinit var iconLoader: ImageLoader
 
     private lateinit var binding: FragmentProfileactivityBinding
     private lateinit var footerBinding: RowLoadingThrobberBinding
@@ -61,13 +67,13 @@ abstract class ProfileActivityDetailsFragment : Fragment(), OnItemClickListener 
         return view
     }
 
-    fun setUser(context: Context?, user: UserDetails?) {
+    fun setUser(context: Context?, user: UserDetails?, iconLoader: ImageLoader) {
         this.user = user
-        adapter = createAdapter(context, user)
+        adapter = createAdapter(context, user, iconLoader)
         displayActivities()
     }
 
-    protected abstract fun createAdapter(context: Context?, user: UserDetails?): ActivityDetailsAdapter?
+    protected abstract fun createAdapter(context: Context?, user: UserDetails?, iconLoader: ImageLoader): ActivityDetailsAdapter?
     private fun displayActivities() {
         binding.profileDetailsActivitylist.adapter = adapter
         loadPage(1)
@@ -118,7 +124,7 @@ abstract class ProfileActivityDetailsFragment : Fragment(), OnItemClickListener 
             i.putExtra(Profile.USER_ID, activity.withUserId)
             context.startActivity(i)
         } else if (activity.category == ActivityDetails.Category.FEED_SUBSCRIPTION) {
-            val feed = feedUtils.getFeed(activity.feedId)
+            val feed = dbHelper.getFeed(activity.feedId)
             if (feed == null) {
                 Toast.makeText(context, R.string.profile_feed_not_available, Toast.LENGTH_SHORT).show()
             } else {
@@ -135,7 +141,7 @@ abstract class ProfileActivityDetailsFragment : Fragment(), OnItemClickListener 
         } else if (isSocialFeedCategory(activity)) {
             // Strip the social: prefix from feedId
             val socialFeedId = activity.feedId.substring(7)
-            val feed = feedUtils.getSocialFeed(socialFeedId)
+            val feed = dbHelper.getSocialFeed(socialFeedId)
             if (feed == null) {
                 Toast.makeText(context, R.string.profile_do_not_follow, Toast.LENGTH_SHORT).show()
             } else {

@@ -16,7 +16,13 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import javax.inject.Inject;
+
 public class DeleteFeedFragment extends DialogFragment {
+
+    @Inject
+    FeedUtils feedUtils;
+
     private static final String FEED_TYPE = "feed_type";
 	private static final String FEED_ID = "feed_id";
 	private static final String FEED_NAME = "feed_name";
@@ -73,11 +79,11 @@ public class DeleteFeedFragment extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (getArguments().getString(FEED_TYPE).equals(NORMAL_FEED)) {
-                    FeedUtils.deleteFeed(getArguments().getString(FEED_ID), getArguments().getString(FOLDER_NAME), getActivity());
+                    feedUtils.deleteFeed(getArguments().getString(FEED_ID), getArguments().getString(FOLDER_NAME), getActivity());
                 } else if (getArguments().getString(FEED_TYPE).equals(SAVED_SEARCH_FEED)) {
-                    FeedUtils.deleteSavedSearch(getArguments().getString(FEED_ID), getArguments().getString(QUERY), getActivity());
+                    feedUtils.deleteSavedSearch(getArguments().getString(FEED_ID), getArguments().getString(QUERY), getActivity());
                 } else {
-                    FeedUtils.deleteSocialFeed(getArguments().getString(FEED_ID), getActivity());
+                    feedUtils.deleteSocialFeed(getArguments().getString(FEED_ID), getActivity());
                 }
                 // if called from a feed view, end it
                 Activity activity = DeleteFeedFragment.this.getActivity();
