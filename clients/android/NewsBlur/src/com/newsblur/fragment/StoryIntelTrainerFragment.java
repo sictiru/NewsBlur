@@ -28,9 +28,6 @@ import com.newsblur.util.UIUtils;
 
 import javax.inject.Inject;
 
-import dagger.hilt.android.AndroidEntryPoint;
-
-@AndroidEntryPoint
 public class StoryIntelTrainerFragment extends DialogFragment {
 
     @Inject

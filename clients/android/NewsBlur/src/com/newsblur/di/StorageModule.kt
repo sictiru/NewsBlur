@@ -10,7 +10,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -29,8 +28,8 @@ class StorageModule {
 
     @Singleton
     @Provides
-    @ImageFileCache
-    fun provideImageCache(@ApplicationContext context: Context): FileCache =
+    @StoryFileCache
+    fun provideStoryCache(@ApplicationContext context: Context): FileCache =
             FileCache.asStoryImageCache(context)
 
     @Singleton

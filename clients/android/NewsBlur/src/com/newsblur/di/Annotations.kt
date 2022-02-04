@@ -4,7 +4,7 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class ImageFileCache
+annotation class StoryFileCache
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
