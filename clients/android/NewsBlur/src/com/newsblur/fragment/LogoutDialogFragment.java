@@ -13,6 +13,9 @@ import com.newsblur.util.PrefsUtils;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class LogoutDialogFragment extends DialogFragment {
 
     @Inject

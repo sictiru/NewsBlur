@@ -25,6 +25,6 @@ class ImageModule {
     @ThumbnailLoader
     fun provideThumbnailLoader(
             @ApplicationContext context: Context,
-            @ThumbnailFileCache fileCache: FileCache,
+            @StoryFileCache fileCache: FileCache,
     ): ImageLoader = ImageLoader.asThumbnailLoader(context, fileCache)
 }

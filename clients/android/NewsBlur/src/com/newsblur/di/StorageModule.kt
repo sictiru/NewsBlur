@@ -37,10 +37,4 @@ class StorageModule {
     @IconFileCache
     fun provideIconCache(@ApplicationContext context: Context): FileCache =
             FileCache.asIconCache(context)
-
-    @Singleton
-    @Provides
-    @ThumbnailFileCache
-    fun provideThumbnailCache(@ApplicationContext context: Context): FileCache =
-            FileCache.asThumbnailCache(context)
 }

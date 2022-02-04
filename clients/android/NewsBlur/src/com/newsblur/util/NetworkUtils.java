@@ -54,6 +54,7 @@ public class NetworkUtils {
                 }
             }
         } catch (Throwable t) {
+            Log.d("NetworkUtils.loadURL", t.getMessage());
             // a huge number of things could go wrong fetching and storing an image. don't spam logs with them
         }
         return bytesRead;

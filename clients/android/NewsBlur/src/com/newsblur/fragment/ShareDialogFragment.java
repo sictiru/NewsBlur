@@ -23,6 +23,9 @@ import com.newsblur.util.UIUtils;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class ShareDialogFragment extends DialogFragment {
 
     @Inject

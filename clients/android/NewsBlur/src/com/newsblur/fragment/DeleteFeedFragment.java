@@ -18,6 +18,9 @@ import androidx.fragment.app.DialogFragment;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class DeleteFeedFragment extends DialogFragment {
 
     @Inject
