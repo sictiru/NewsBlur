@@ -41,6 +41,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
     implementation 'androidx.lifecycle:lifecycle-process:2.4.0'
     implementation 'androidx.core:core-splashscreen:1.0.0-beta01'
+    implementation 'com.amazon.device:amazon-appstore-sdk:3.0.2'
 }
 
 android {
@@ -82,5 +83,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
         }
     }
+
+//    flavorDimensions "store"
+//    productFlavors {
+//        google {
+//
+//        }
+//        amazon {
+//
+//        }
+//    }
 }
 
