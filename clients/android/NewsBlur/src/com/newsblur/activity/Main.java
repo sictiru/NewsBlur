@@ -5,12 +5,14 @@ import static com.newsblur.service.NBSyncReceiver.UPDATE_METADATA;
 import static com.newsblur.service.NBSyncReceiver.UPDATE_REBUILD;
 import static com.newsblur.service.NBSyncReceiver.UPDATE_STATUS;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
@@ -36,6 +38,9 @@ import com.newsblur.fragment.LogoutDialogFragment;
 import com.newsblur.fragment.TextSizeDialogFragment;
 import com.newsblur.service.BootReceiver;
 import com.newsblur.service.NBSyncService;
+import com.newsblur.subscription.AmznManager;
+import com.newsblur.subscription.AmznManagerImpl;
+import com.newsblur.subscription.AmznManagerListener;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedUtils;
 import com.newsblur.util.PrefConstants.ThemeValue;
@@ -45,7 +50,7 @@ import com.newsblur.util.UIUtils;
 import com.newsblur.view.StateToggleButton.StateChangedListener;
 import com.newsblur.widget.WidgetUtils;
 
-public class Main extends NbActivity implements StateChangedListener, SwipeRefreshLayout.OnRefreshListener, AbsListView.OnScrollListener, PopupMenu.OnMenuItemClickListener, OnSeekBarChangeListener {
+public class Main extends NbActivity implements StateChangedListener, SwipeRefreshLayout.OnRefreshListener, AbsListView.OnScrollListener, PopupMenu.OnMenuItemClickListener, OnSeekBarChangeListener, AmznManagerListener {
 
     public static final String EXTRA_FORCE_SHOW_FEED_ID = "force_show_feed_id";
 
@@ -54,6 +59,7 @@ public class Main extends NbActivity implements StateChangedListener, SwipeRefre
     private SwipeRefreshLayout swipeLayout;
     private boolean wasSwipeEnabled = false;
     private ActivityMainBinding binding;
+    private AmznManager amznManager;
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -117,6 +123,9 @@ public class Main extends NbActivity implements StateChangedListener, SwipeRefre
         binding.mainProfileButton.setOnClickListener(v -> onClickProfileButton());
         binding.mainUserImage.setOnClickListener(v -> onClickUserButton());
         binding.mainSearchFeedsButton.setOnClickListener(v -> onClickSearchFeedsButton());
+
+        amznManager = new AmznManagerImpl(this);
+        amznManager.registerService(this);
 	}
 
     @Override
@@ -406,4 +415,9 @@ public class Main extends NbActivity implements StateChangedListener, SwipeRefre
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
 	}
+
+    @Override
+    public void onServiceListenerRegistered() {
+        amznManager.getProductData();
+    }
 }

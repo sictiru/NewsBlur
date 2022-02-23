@@ -1,0 +1,9 @@
+{
+  "com.newsblur.nb.premium": {
+    "description":"Monthly Subscription to NewsBlur",
+    "title":"My Magazine",
+    "itemType":"SUBSCRIPTION",
+    "price":5.0,
+    "subscriptionParent":"com.newsblur.nb.premium"
+  }
+}

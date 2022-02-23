@@ -10,6 +10,12 @@ import com.amazon.device.iap.model.PurchaseUpdatesResponse
 import com.amazon.device.iap.model.Receipt
 import com.amazon.device.iap.model.UserDataResponse
 
+private const val AMZN_SKU = "nb.premium"
+
+interface AmznManagerListener {
+
+    fun onServiceListenerRegistered()
+}
 
 interface AmznManager {
 
@@ -18,9 +24,11 @@ interface AmznManager {
      * purchases and subscriptions.
      */
     fun registerService(context: Context)
+
+    fun getProductData()
 }
 
-class AmznManagerImpl : AmznManager {
+class AmznManagerImpl(private val listener: AmznManagerListener) : AmznManager {
 
     private val amznPurchasingListener = AmznPurchasingListener()
 
@@ -36,34 +44,23 @@ class AmznManagerImpl : AmznManager {
     // 4) You will receive a response from getPurchaseUpdates in most scenarios. Responses are sent in the following cases:
     // Subscriptions and entitlements: You will always receive a receipt for subscription and entitlement purchases.
 
-
     override fun registerService(context: Context) {
         PurchasingService.registerListener(context, amznPurchasingListener)
+//        listener.onServiceListenerRegistered()
     }
 
-    fun getProductData() {
-        val productSkus: MutableSet<String> = mutableSetOf()
-//        for (mySku in MySku.values()) {
-//            productSkus.add(mySku.getSku())
-//        }
+    override fun getProductData() {
+        val productSkus = mutableSetOf(AMZN_SKU)
         PurchasingService.getProductData(productSkus)
-
-
-//        val productSkus: MutableSet<string> = HashSet()
-//        productSkus.add("com.amazon.example.iap.consumable")
-//        productSkus.add("com.amazon.example.iap.entitlement")
-//        productSkus.add("com.amazon.example.iap.subscription")
-//        PurchasingService.getProductData(productSkus)
     }
 
     fun purchaseSubscription() {
-        val requestId = PurchasingService.purchase("sku")
+        val requestId = PurchasingService.purchase(AMZN_SKU)
     }
 
     private inner class AmznPurchasingListener : PurchasingListener {
 
         override fun onUserDataResponse(response: UserDataResponse) {
-
             when (response.requestStatus) {
                 UserDataResponse.RequestStatus.SUCCESSFUL -> {
                     currentUserId = response.userData.userId
@@ -90,7 +87,7 @@ class AmznManagerImpl : AmznManager {
                     }
                 }
                 ProductDataResponse.RequestStatus.FAILED -> {
-                    Log.d("Amzn", "ProductDataRequestStatus: FAILED")
+                    Log.d("Amzn", "ProductDataRequestStatus: FAILED ${response.toJSON()}")
                 }
                 ProductDataResponse.RequestStatus.NOT_SUPPORTED -> {
                 }
