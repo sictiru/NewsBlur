@@ -247,4 +247,8 @@
 
     </application>
 
+    <queries>
+        <package android:name="com.amazon.venezia"/>
+    </queries>
+
 </manifest>

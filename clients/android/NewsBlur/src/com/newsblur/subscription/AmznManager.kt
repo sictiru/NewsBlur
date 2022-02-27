@@ -2,15 +2,15 @@ package com.newsblur.subscription
 
 import android.content.Context
 import android.util.Log
+import com.amazon.device.drm.LicensingListener
+import com.amazon.device.drm.LicensingService
+import com.amazon.device.drm.model.LicenseResponse
 import com.amazon.device.iap.PurchasingListener
 import com.amazon.device.iap.PurchasingService
-import com.amazon.device.iap.model.ProductDataResponse
-import com.amazon.device.iap.model.PurchaseResponse
-import com.amazon.device.iap.model.PurchaseUpdatesResponse
-import com.amazon.device.iap.model.Receipt
-import com.amazon.device.iap.model.UserDataResponse
+import com.amazon.device.iap.model.*
 
 private const val AMZN_SKU = "nb.premium"
+private const val TAG = "Amzn"
 
 interface AmznManagerListener {
 
@@ -45,8 +45,14 @@ class AmznManagerImpl(private val listener: AmznManagerListener) : AmznManager {
     // Subscriptions and entitlements: You will always receive a receipt for subscription and entitlement purchases.
 
     override fun registerService(context: Context) {
+//        LicensingService.verifyLicense(context, object : LicensingListener {
+//            override fun onLicenseCommandResponse(p0: LicenseResponse?) {
+//                Log.d(TAG, p0.toString())
+//            }
+//
+//        })
         PurchasingService.registerListener(context, amznPurchasingListener)
-//        listener.onServiceListenerRegistered()
+        listener.onServiceListenerRegistered()
     }
 
     override fun getProductData() {
@@ -78,16 +84,16 @@ class AmznManagerImpl(private val listener: AmznManagerListener) : AmznManager {
             when (response.requestStatus) {
                 ProductDataResponse.RequestStatus.SUCCESSFUL -> {
                     response.unavailableSkus.forEach {
-                        Log.d("Amzn", "Unavailable sku $it")
+                        Log.d(TAG, "Unavailable sku $it")
                     }
 
                     response.productData.forEach {
                         val product = it.value
-                        Log.d("Amzn", String.format("Product: %s\n Type: %s\n SKU: %s\n Price: %s\n Description: %s\n", product.title, product.productType, product.sku, product.price, product.description))
+                        Log.d(TAG, String.format("Product: %s\n Type: %s\n SKU: %s\n Price: %s\n Description: %s\n", product.title, product.productType, product.sku, product.price, product.description))
                     }
                 }
                 ProductDataResponse.RequestStatus.FAILED -> {
-                    Log.d("Amzn", "ProductDataRequestStatus: FAILED ${response.toJSON()}")
+                    Log.d(TAG, "ProductDataRequestStatus: FAILED ${response.toJSON()}")
                 }
                 ProductDataResponse.RequestStatus.NOT_SUPPORTED -> {
                 }
@@ -102,7 +108,7 @@ class AmznManagerImpl(private val listener: AmznManagerListener) : AmznManager {
                     val receipt: Receipt = response.receipt
                     currentUserId = response.userData.userId
                     currentMarketplace = response.userData.marketplace
-                    Log.d("Amzn", "onPurchaseResponse: receipt json:" + receipt.toJSON())
+                    Log.d(TAG, "onPurchaseResponse: receipt json:" + receipt.toJSON())
                     // TODO handle receipt
 //                    handleReceipt(receipt, response.userData)
 //                    refresh content
@@ -115,6 +121,10 @@ class AmznManagerImpl(private val listener: AmznManagerListener) : AmznManager {
                 null -> {
                 }
             }
+        }
+
+        override fun onModifySubscriptionResponse(p0: ModifySubscriptionResponse?) {
+
         }
 
         override fun onPurchaseUpdatesResponse(response: PurchaseUpdatesResponse) {
