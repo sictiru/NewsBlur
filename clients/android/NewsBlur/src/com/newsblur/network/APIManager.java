@@ -365,14 +365,24 @@ public class APIManager {
 		}
 	}
 
-	public ShareExternalStoryResponse shareExternalStory(@NonNull String storyTitle, @NonNull String storyUrl, @NonNull String shareComemnts) {
+	public String saveExternalStory(@NonNull String storyTitle, @NonNull String storyUrl) {
         ContentValues values = new ContentValues();
         values.put(APIConstants.PARAMETER_TITLE, storyTitle);
         values.put(APIConstants.PARAMETER_STORY_URL, storyUrl);
-        values.put(APIConstants.PARAMETER_SHARE_COMMENT, shareComemnts);
+
+        APIResponse response = post(buildUrl(APIConstants.PATH_SAVE_EXTERNAL_STORY), values);
+//        return response.getResponse(gson, String.class);
+        return "";
+    }
+
+	public ShareExternalStoryResponse shareExternalStory(@NonNull String storyTitle, @NonNull String storyUrl, @NonNull String shareComments) {
+        ContentValues values = new ContentValues();
+        values.put(APIConstants.PARAMETER_TITLE, storyTitle);
+        values.put(APIConstants.PARAMETER_STORY_URL, storyUrl);
+        values.put(APIConstants.PARAMETER_SHARE_COMMENT, shareComments);
 
         APIResponse response = post(buildUrl(APIConstants.PATH_SHARE_EXTERNAL_STORY), values);
-        return (ShareExternalStoryResponse) response.getResponse(gson, ShareExternalStoryResponse.class);
+        return response.getResponse(gson, ShareExternalStoryResponse.class);
     }
 
     public StoriesResponse shareStory(String storyId, String feedId, String comment, String sourceUserId) {

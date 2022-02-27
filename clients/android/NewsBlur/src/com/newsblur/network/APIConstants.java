@@ -44,6 +44,7 @@ public class APIConstants {
 	public static final String PATH_SOCIALFEED_STORIES = "/social/stories";
 	public static final String PATH_SIGNUP = "/api/signup";
 	public static final String PATH_SHARE_EXTERNAL_STORY = "/api/share_story/";
+	public static final String PATH_SAVE_EXTERNAL_STORY = "/api/save_story/";
 	public static final String PATH_MARK_FEED_AS_READ = "/reader/mark_feed_as_read/";
 	public static final String PATH_MARK_ALL_AS_READ = "/reader/mark_all_as_read/";
 	public static final String PATH_MARK_STORIES_READ = "/reader/mark_story_hashes_as_read/";

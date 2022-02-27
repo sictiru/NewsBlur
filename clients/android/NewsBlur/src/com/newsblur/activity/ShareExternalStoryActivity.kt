@@ -34,10 +34,11 @@ class ShareExternalStoryActivity : AppCompatActivity() {
 
     private fun handleIntent() {
         if (!storyTitle.isNullOrEmpty() && !storyUrl.isNullOrEmpty()) {
-            binding.textTitle.text = getString(R.string.share_newsblur, storyTitle)
+            binding.textTitle.text = getString(R.string.share_save_newsblur, storyTitle)
 
             binding.textCancel.setOnClickListener { finish() }
             binding.textShare.setOnClickListener { shareStory(binding.inputComment.text.toString()) }
+            binding.textSave.setOnClickListener { saveStory() }
         } else {
             finishWithToast("NewsBlur share metadata unrecognized")
         }
@@ -59,6 +60,26 @@ class ShareExternalStoryActivity : AppCompatActivity() {
                         val errorMessage = response.getErrorMessage("Sharing story was unsuccessful")
                         finishWithToast(errorMessage)
                     }
+                }
+        )
+    }
+
+    private fun saveStory() {
+        lifecycleScope.executeAsyncTask(
+                onPreExecute = {
+                    binding.progressIndicator.setViewVisible()
+                    binding.containerButtons.setViewGone()
+                },
+                doInBackground = {
+                    apiManager.saveExternalStory(storyTitle!!, storyUrl!!)
+                },
+                onPostExecute = { response ->
+//                    if (!response.isError) {
+//                        finishWithToast("NewsBlur shared $storyTitle successfully!")
+//                    } else {
+//                        val errorMessage = response.getErrorMessage("Sharing story was unsuccessful")
+//                        finishWithToast(errorMessage)
+//                    }
                 }
         )
     }
