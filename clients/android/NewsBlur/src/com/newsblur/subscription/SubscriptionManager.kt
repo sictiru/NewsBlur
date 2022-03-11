@@ -90,6 +90,13 @@ interface SubscriptionManagerEntryPoint {
     fun apiManager(): APIManager
 }
 
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface SubscriptionManagerEntryPoint {
+
+    fun apiManager(): APIManager
+}
+
 class SubscriptionManagerImpl(
         private val context: Context,
         private val scope: CoroutineScope = NBScope,

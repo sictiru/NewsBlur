@@ -43,7 +43,6 @@ open class NbActivity : AppCompatActivity() {
         lastTheme = PrefsUtils.getSelectedTheme(this)
 
         super.onCreate(bundle)
-        offerInitContext(this)
 
         // in rare cases of process interruption or DB corruption, an activity can launch without valid
         // login creds.  redirect the user back to the loging workflow.
@@ -52,7 +51,7 @@ open class NbActivity : AppCompatActivity() {
             PrefsUtils.logout(this, dbHelper)
             finish()
         }
-        
+
         bundle?.let {
             uniqueLoginKey = it.getString(UNIQUE_LOGIN_KEY)
         }
