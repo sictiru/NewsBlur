@@ -12,7 +12,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,7 +32,6 @@ import com.newsblur.network.domain.LoginResponse;
 import com.newsblur.network.domain.NewsBlurResponse;
 import com.newsblur.network.domain.ProfileResponse;
 import com.newsblur.network.domain.RegisterResponse;
-import com.newsblur.network.domain.ShareExternalStoryResponse;
 import com.newsblur.network.domain.StarredStoryHashesResponse;
 import com.newsblur.network.domain.StoriesResponse;
 import com.newsblur.network.domain.StoryChangesResponse;
@@ -365,24 +363,21 @@ public class APIManager {
 		}
 	}
 
-	public String saveExternalStory(@NonNull String storyTitle, @NonNull String storyUrl) {
+	public APIResponse saveExternalStory(@NonNull String storyTitle, @NonNull String storyUrl) {
         ContentValues values = new ContentValues();
         values.put(APIConstants.PARAMETER_TITLE, storyTitle);
         values.put(APIConstants.PARAMETER_STORY_URL, storyUrl);
 
-        APIResponse response = post(buildUrl(APIConstants.PATH_SAVE_EXTERNAL_STORY), values);
-//        return response.getResponse(gson, String.class);
-        return "";
+        return post(buildUrl(APIConstants.PATH_SAVE_EXTERNAL_STORY), values);
     }
 
-	public ShareExternalStoryResponse shareExternalStory(@NonNull String storyTitle, @NonNull String storyUrl, @NonNull String shareComments) {
+	public APIResponse shareExternalStory(@NonNull String storyTitle, @NonNull String storyUrl, @NonNull String shareComments) {
         ContentValues values = new ContentValues();
         values.put(APIConstants.PARAMETER_TITLE, storyTitle);
         values.put(APIConstants.PARAMETER_STORY_URL, storyUrl);
         values.put(APIConstants.PARAMETER_SHARE_COMMENT, shareComments);
 
-        APIResponse response = post(buildUrl(APIConstants.PATH_SHARE_EXTERNAL_STORY), values);
-        return response.getResponse(gson, ShareExternalStoryResponse.class);
+        return post(buildUrl(APIConstants.PATH_SHARE_EXTERNAL_STORY), values);
     }
 
     public StoriesResponse shareStory(String storyId, String feedId, String comment, String sourceUserId) {
