@@ -12,7 +12,7 @@
         android:id="@+id/img_feed_icon"
         android:layout_width="21dp"
         android:layout_height="21dp"
-        android:src="@drawable/world"
+        android:src="@drawable/ic_world"
         app:shapeAppearanceOverlay="@style/smallRoundImageShapeAppearance"/>
 
     <TextView
