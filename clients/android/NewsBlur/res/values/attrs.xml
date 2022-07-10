@@ -26,7 +26,6 @@
     <attr name="rowBorderBottom" format="string" />
     <attr name="profileCount" format="string" />
     <attr name="profileActivityList" format="string" />
-    <attr name="itemHeaderDivider" format="string" />
     <attr name="storyCommentDivider" format="string" />
     <attr name="activityDetailsPager" format="string" />
     <attr name="explainerText" format="string" />

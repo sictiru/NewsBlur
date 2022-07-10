@@ -305,16 +305,6 @@
         <item name="android:divider">@drawable/divider_dark</item>
     </style>
 
-    <style name="itemHeaderDivider">
-        <item name="android:background">@drawable/divider_item_header</item>
-    </style>
-    <style name="itemHeaderDivider.dark">
-        <item name="android:background">@drawable/dark_divider_item_header</item>
-    </style>
-    <style name="itemHeaderDivider.black">
-        <item name="android:background">@drawable/black_divider_item_header</item>
-    </style>
-
     <style name="storyCommentDivider">
         <item name="android:background">@color/story_comment_divider</item>
     </style>
