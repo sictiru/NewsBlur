@@ -645,11 +645,10 @@ public class FolderListAdapter extends BaseExpandableListAdapter {
         activeFolderChildren = new ArrayList<List<Feed>>();
         folderNeutCounts = new ArrayList<Integer>();
         folderPosCounts = new ArrayList<Integer>();
-        // add the always-present (if enabled) special rows/folders that got at the top of the list
-        if (PrefsUtils.isEnableRowGlobalShared(context) && (currentState != StateFilter.SAVED)) addSpecialRow(GLOBAL_SHARED_STORIES_GROUP_KEY);
-        if ((currentState != StateFilter.SAVED)) addSpecialRow(ALL_SHARED_STORIES_GROUP_KEY);
+
         if (PrefsUtils.isEnableRowInfrequent(context) && (currentState != StateFilter.SAVED)) addSpecialRow(INFREQUENT_SITE_STORIES_GROUP_KEY);
         addSpecialRow(ALL_STORIES_GROUP_KEY);
+
         // create a sorted list of folder display names
         List<String> sortedFolderNames = new ArrayList<String>(flatFolders.keySet());
         Collections.sort(sortedFolderNames, Folder.FolderNameComparator);
@@ -698,8 +697,9 @@ public class FolderListAdapter extends BaseExpandableListAdapter {
             Collections.sort(folderChildren, feedComparator);
         }
 
-        // add the always-present (if enabled) special rows/folders that got at the bottom of the list
         addSpecialRow(READ_STORIES_GROUP_KEY);
+        if (PrefsUtils.isEnableRowGlobalShared(context) && (currentState != StateFilter.SAVED)) addSpecialRow(GLOBAL_SHARED_STORIES_GROUP_KEY);
+        if ((currentState != StateFilter.SAVED)) addSpecialRow(ALL_SHARED_STORIES_GROUP_KEY);
         addSpecialRow(SAVED_SEARCHES_GROUP_KEY);
         addSpecialRow(SAVED_STORIES_GROUP_KEY);
         recountChildren();
