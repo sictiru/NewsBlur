@@ -21,7 +21,6 @@
         <item name="defaultText">@style/defaultText</item>
         <item name="linkText">@style/linkText</item>
         <item name="storySnippetText">@style/storySnippetText</item>
-        <item name="storyDateText">@style/storyDateText</item>
         <item name="storyFeedTitleText">@style/storyFeedTitleText</item>
         <item name="selectorStoryBackground">@style/selectorStoryBackground</item>
         <item name="rowItemHeaderBackground">@style/rowItemHeaderBackground</item>
@@ -76,7 +75,6 @@
         <item name="defaultText">@style/defaultText.dark</item>
         <item name="linkText">@style/linkText.dark</item>
         <item name="storySnippetText">@style/storySnippetText.dark</item>
-        <item name="storyDateText">@style/storyDateText.dark</item>
         <item name="storyFeedTitleText">@style/storyFeedTitleText.dark</item>
         <item name="selectorStoryBackground">@style/selectorStoryBackground.dark</item>
         <item name="rowItemHeaderBackground">@style/rowItemHeaderBackground.dark</item>
@@ -132,7 +130,6 @@
         <item name="defaultText">@style/defaultText.dark</item>
         <item name="linkText">@style/linkText.dark</item>
         <item name="storySnippetText">@style/storySnippetText.dark</item>
-        <item name="storyDateText">@style/storyDateText.dark</item>
         <item name="storyFeedTitleText">@style/storyFeedTitleText.dark</item>
         <item name="selectorStoryBackground">@style/selectorStoryBackground.black</item>
         <item name="rowItemHeaderBackground">@style/rowItemHeaderBackground.black</item>

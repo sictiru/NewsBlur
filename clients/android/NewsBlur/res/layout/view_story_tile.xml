@@ -25,13 +25,11 @@
         android:id="@+id/story_item_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
+        android:layout_alignStart="@+id/story_item_title"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="2dp"
-        android:layout_marginRight="4dp"
-        android:singleLine="true"
-        style="?storyDateText" 
-        />
+        android:layout_marginTop="5dp"
+        android:singleLine="true" />
 
     <ImageView
         android:id="@+id/story_item_feedicon"

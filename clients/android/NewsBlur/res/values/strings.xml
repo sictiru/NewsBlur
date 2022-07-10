@@ -709,4 +709,6 @@
 
     <string name="search">Search</string>
     <string name="add_feed">Add feed</string>
+
+    <string name="story_author">• %s</string>
 </resources>
