@@ -9,12 +9,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.google.android.material.imageview.ShapeableImageView;
 import com.newsblur.R;
 import com.newsblur.domain.UserDetails;
 import com.newsblur.domain.ActivityDetails;
 import com.newsblur.domain.ActivityDetails.Category;
 import com.newsblur.network.APIConstants;
-import com.newsblur.util.FeedUtils;
 import com.newsblur.util.ImageLoader;
 import com.newsblur.util.UIUtils;
 
@@ -54,9 +54,9 @@ public abstract class ActivityDetailsAdapter extends ArrayAdapter<ActivityDetail
         }
         final ActivityDetails activity = getItem(position);
 
-        TextView activityText = (TextView) view.findViewById(R.id.row_activity_text);
-        TextView activityTime = (TextView) view.findViewById(R.id.row_activity_time);
-        RoundedImageView imageView = (RoundedImageView) view.findViewById(R.id.row_activity_icon);
+        TextView activityText = view.findViewById(R.id.row_activity_text);
+        TextView activityTime = view.findViewById(R.id.row_activity_time);
+        ShapeableImageView imageView = view.findViewById(R.id.row_activity_icon);
 
         activityTime.setText(activity.timeSince + " " + ago);
         if (activity.category == Category.FEED_SUBSCRIPTION) {

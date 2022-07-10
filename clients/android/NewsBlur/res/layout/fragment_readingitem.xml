@@ -20,12 +20,13 @@
             android:paddingTop="4dp"
             android:paddingBottom="4dp">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/reading_feed_icon"
                 android:layout_width="17dp"
                 android:layout_height="17dp"
                 android:layout_marginStart="16dp"
-                android:contentDescription="@string/description_row_folder_icon" />
+                android:contentDescription="@string/description_row_folder_icon"
+                app:shapeAppearanceOverlay="@style/smallRoundImageShapeAppearance" />
 
             <TextView
                 android:id="@+id/reading_feed_title"
