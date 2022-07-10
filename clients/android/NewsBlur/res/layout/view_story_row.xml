@@ -58,20 +58,18 @@
         android:id="@+id/story_item_feedicon"
         android:layout_width="18dp"
         android:layout_height="18dp"
-        android:layout_marginTop="8dp"
         android:layout_toRightOf="@id/story_item_inteldot_container" />
 
     <TextView
         android:id="@+id/story_item_feedtitle"
+        style="?storyFeedTitleText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="6dp"
-        android:layout_marginTop="7dp"
-        android:layout_toRightOf="@id/story_item_feedicon"
         android:layout_toLeftOf="@id/story_item_thumbnail_right"
+        android:layout_toRightOf="@id/story_item_feedicon"
         android:ellipsize="end"
-        android:singleLine="true"
-        style="?storyFeedTitleText" />
+        android:singleLine="true" />
 
     <ImageView
         android:id="@+id/story_item_saved_icon"
@@ -99,18 +97,20 @@
         android:layout_marginRight="8dp"
         android:visibility="gone" />
 
+    <!--dynamic spacing-->
     <TextView
         android:id="@+id/story_item_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/story_item_feedicon"
         android:layout_toLeftOf="@id/story_item_shared_icon"
         android:layout_toRightOf="@id/story_item_inteldot_container"
-        android:layout_below="@id/story_item_feedicon"
-        android:paddingRight="4dp"
+        android:ellipsize="end"
         android:maxLines="3"
-        android:textStyle="bold"
-        android:ellipsize="end" />
+        android:paddingRight="4dp"
+        android:textStyle="bold" />
 
+    <!--dynamic spacing-->
     <TextView
         android:id="@+id/story_item_content"
         android:layout_width="wrap_content"
@@ -118,22 +118,21 @@
         android:layout_toLeftOf="@id/story_item_thumbnail_right"
         android:layout_toRightOf="@id/story_item_inteldot_container"
         android:layout_below="@id/story_item_title"
-        android:layout_marginTop="4dp"
         android:paddingRight="4dp"
         android:maxLines="2"
         android:ellipsize="end"
         style="?storySnippetText" />
 
+    <!--dynamic spacing-->
     <TextView
         android:id="@+id/story_item_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/story_item_inteldot_container"
         android:layout_below="@id/story_item_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="8dp"
         android:paddingRight="3dp" />
 
+    <!--dynamic spacing-->
     <TextView
         android:id="@+id/story_item_author"
         android:layout_width="wrap_content"

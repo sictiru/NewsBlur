@@ -626,7 +626,7 @@ public class StoryViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         int verticalTitlePadding = spacingStyle.getStoryTitleVerticalPadding(context);
         vh.storyTitleView.setPadding(vh.storyTitleView.getPaddingLeft(), verticalTitlePadding,
                 vh.storyTitleView.getPaddingRight(), verticalTitlePadding);
-        
+
         // read/unread fading
         if (this.ignoreReadStatus || (! story.read)) {
             vh.leftBarOne.getBackground().setAlpha(255);
@@ -698,6 +698,14 @@ public class StoryViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         int contentVerticalPadding = spacingStyle.getStoryContentVerticalPadding(context);
         vh.storySnippet.setPadding(vh.storySnippet.getPaddingLeft(), vh.storySnippet.getPaddingTop(),
                 vh.storySnippet.getPaddingRight(), contentVerticalPadding);
+
+        int verticalContainerMargin = spacingStyle.getStoryContainerMargin(context);
+        RelativeLayout.LayoutParams feedIconLp = (RelativeLayout.LayoutParams) vh.feedIconView.getLayoutParams();
+        feedIconLp.setMargins(feedIconLp.leftMargin, verticalContainerMargin, feedIconLp.rightMargin, feedIconLp.bottomMargin);
+        RelativeLayout.LayoutParams feedTitleLp = (RelativeLayout.LayoutParams) vh.feedTitleView.getLayoutParams();
+        feedTitleLp.setMargins(feedTitleLp.leftMargin, verticalContainerMargin, feedTitleLp.rightMargin, feedTitleLp.bottomMargin);
+        RelativeLayout.LayoutParams storyDateLp = (RelativeLayout.LayoutParams) vh.storyDate.getLayoutParams();
+        storyDateLp.setMargins(storyDateLp.leftMargin, storyDateLp.topMargin, storyDateLp.rightMargin, verticalContainerMargin);
 
         if (PrefsUtils.getThumbnailStyle(context)  != ThumbnailStyle.OFF && vh.thumbViewRight != null && vh.thumbViewLeft != null) {
             // the view will display a stale, recycled thumb before the new one loads if the old is not cleared
