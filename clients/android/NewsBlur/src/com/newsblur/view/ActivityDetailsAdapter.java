@@ -58,7 +58,7 @@ public abstract class ActivityDetailsAdapter extends ArrayAdapter<ActivityDetail
         TextView activityTime = (TextView) view.findViewById(R.id.row_activity_time);
         RoundedImageView imageView = (RoundedImageView) view.findViewById(R.id.row_activity_icon);
 
-        activityTime.setText(activity.timeSince.toUpperCase() + " " + ago);
+        activityTime.setText(activity.timeSince + " " + ago);
         if (activity.category == Category.FEED_SUBSCRIPTION) {
             iconLoader.displayImage(APIConstants.S3_URL_FEED_ICONS + activity.feedId + ".png", imageView);
         } else if (activity.category == Category.SHARED_STORY) {

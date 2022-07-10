@@ -166,7 +166,7 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
             val userPhoto = commentUser.photoUrl
             val commentLocation = commentView.findViewById<View>(R.id.comment_location) as TextView
             if (!TextUtils.isEmpty(commentUser.location)) {
-                commentLocation.text = commentUser.location.uppercase()
+                commentLocation.text = commentUser.location
             } else {
                 commentLocation.visibility = View.GONE
             }
