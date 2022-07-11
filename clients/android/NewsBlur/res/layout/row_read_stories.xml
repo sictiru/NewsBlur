@@ -7,13 +7,13 @@
     <ImageView
         android:id="@+id/row_read_icon"
         android:layout_width="16dp"
-        android:layout_height="13dp"
+        android:layout_height="16dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="13dp"
         android:layout_marginRight="13dp"
         android:contentDescription="@string/description_row_folder_icon"
-        android:src="@drawable/g_icn_unread" />
+        android:src="@drawable/ic_indicator_unread" />
 
     <TextView
         android:id="@+id/row_foldername"

@@ -39,13 +39,13 @@
 
         <ImageView
             android:id="@+id/main_unread_count_neut_icon"
-            android:layout_width="11dp"
-            android:layout_height="11dp"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
             android:layout_below="@+id/main_user_name"
             android:layout_toRightOf="@id/main_user_image"
             android:layout_marginLeft="6dp"
-            android:layout_marginTop="5dp"
-            android:src="@drawable/g_icn_unread" />
+            android:layout_marginTop="3dp"
+            android:src="@drawable/ic_indicator_unread" />
 
         <TextView
             android:id="@+id/main_unread_count_neut_text"
@@ -58,13 +58,13 @@
 
         <ImageView
             android:id="@+id/main_unread_count_posi_icon"
-            android:layout_width="11dp"
-            android:layout_height="11dp"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
             android:layout_below="@+id/main_user_name"
             android:layout_toRightOf="@id/main_unread_count_neut_text"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="5dp"
-            android:src="@drawable/g_icn_focus" />
+            android:src="@drawable/ic_indicator_focus" />
 
         <TextView
             android:id="@+id/main_unread_count_posi_text"
@@ -183,8 +183,8 @@
         android:id="@+id/swipe_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/feedlist_search_query"
-        android:layout_above="@id/fragment_feedintelligenceselector" >
+        android:layout_above="@id/fragment_feedintelligenceselector"
+        android:layout_below="@id/feedlist_search_query">
 
         <fragment
             android:name="com.newsblur.fragment.FolderListFragment"

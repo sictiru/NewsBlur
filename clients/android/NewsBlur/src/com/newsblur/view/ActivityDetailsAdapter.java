@@ -64,7 +64,7 @@ public abstract class ActivityDetailsAdapter extends ArrayAdapter<ActivityDetail
         } else if (activity.category == Category.SHARED_STORY) {
             iconLoader.displayImage(currentUserDetails.photoUrl, imageView);
         } else if (activity.category == Category.STAR) {
-            imageView.setImageResource(R.drawable.ic_clock);
+            imageView.setImageResource(R.drawable.ic_saved);
         } else if (activity.user != null) {
             iconLoader.displayImage(activity.user.photoUrl, imageView);
         } else {

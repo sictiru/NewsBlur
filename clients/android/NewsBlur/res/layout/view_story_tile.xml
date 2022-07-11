@@ -60,7 +60,7 @@
 
     <ImageView
         android:id="@+id/story_item_saved_icon"
-        android:src="@drawable/ic_clock"
+        android:src="@drawable/ic_saved"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_above="@id/story_item_feedtitle"
@@ -73,7 +73,7 @@
 
     <ImageView
         android:id="@+id/story_item_shared_icon"
-        android:src="@drawable/ic_shared"
+        android:src="@drawable/ic_share"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_above="@id/story_item_feedtitle"

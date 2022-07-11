@@ -574,11 +574,11 @@ public class StoryViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         if (! ignoreIntel) {
             int score = story.extern_intelTotalScore;
             if (score > 0) {
-                vh.intelDot.setImageResource(R.drawable.g_icn_focus);
+                vh.intelDot.setImageResource(R.drawable.ic_indicator_focus);
             } else if (score == 0) {
-                vh.intelDot.setImageResource(R.drawable.g_icn_unread);
+                vh.intelDot.setImageResource(R.drawable.ic_indicator_unread);
             } else {
-                vh.intelDot.setImageResource(R.drawable.g_icn_hidden);
+                vh.intelDot.setImageResource(R.drawable.ic_indicator_hidden);
             }
         } else {
             vh.intelDot.setImageResource(android.R.color.transparent);

@@ -227,7 +227,7 @@ public class FolderListAdapter extends BaseExpandableListAdapter {
         // if a group has a sub-view called row_folder_indicator, it will act as an expando
         @Nullable ImageView folderIndicatorView = v.findViewById(R.id.row_folder_indicator);
         if ( folderIndicatorView != null ) {
-            folderIndicatorView.setImageResource(isExpanded ? R.drawable.indicator_expanded : R.drawable.indicator_collapsed);
+            folderIndicatorView.setImageResource(isExpanded ? R.drawable.ic_arrow_down : R.drawable.ic_arrow_up);
 			folderIndicatorView.setOnClickListener(v1 -> toggleGroup(v1, groupPosition, isExpanded));
         }
 
