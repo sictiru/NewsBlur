@@ -75,7 +75,7 @@
             android:layout_marginRight="8dp"
             android:layout_toLeftOf="@id/comment_shareddate"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_star_gray55" />
+            android:src="@drawable/ic_star_inactive" />
         
         <TextView
             android:id="@+id/comment_username"

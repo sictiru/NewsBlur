@@ -209,7 +209,7 @@ public class FolderListAdapter extends BaseExpandableListAdapter {
             v.findViewById(R.id.row_foldersums).setVisibility(isExpanded ? View.INVISIBLE : View.VISIBLE);
             ImageView folderIconView = v.findViewById(R.id.row_folder_icon);
             if ( folderIconView != null ) {
-                folderIconView.setImageResource(isExpanded ? R.drawable.g_icn_folder : R.drawable.g_icn_folder_rss);
+                folderIconView.setImageResource(isExpanded ? R.drawable.ic_folder : R.drawable.ic_folder_closed);
             }
 		}
 

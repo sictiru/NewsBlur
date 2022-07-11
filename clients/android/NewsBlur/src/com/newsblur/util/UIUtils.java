@@ -442,16 +442,16 @@ public class UIUtils {
         if (Integer.valueOf(Classifier.LIKE).equals(classifier.get(key))) {
             row.findViewById(R.id.intel_row_like).setBackgroundResource(R.drawable.ic_thumb_up_green);
             row.findViewById(R.id.intel_row_dislike).setBackgroundResource(R.drawable.ic_thumb_down_yellow);
-            row.findViewById(R.id.intel_row_clear).setBackgroundResource(R.drawable.ic_clear_gray55);
+            row.findViewById(R.id.intel_row_clear).setBackgroundResource(R.drawable.ic_clear);
         } else 
         if (Integer.valueOf(Classifier.DISLIKE).equals(classifier.get(key))) {
             row.findViewById(R.id.intel_row_like).setBackgroundResource(R.drawable.ic_thumb_up_yellow);
             row.findViewById(R.id.intel_row_dislike).setBackgroundResource(R.drawable.ic_thumb_down_red);
-            row.findViewById(R.id.intel_row_clear).setBackgroundResource(R.drawable.ic_clear_gray55);
+            row.findViewById(R.id.intel_row_clear).setBackgroundResource(R.drawable.ic_clear);
         } else {
             row.findViewById(R.id.intel_row_like).setBackgroundResource(R.drawable.ic_thumb_up_yellow);
             row.findViewById(R.id.intel_row_dislike).setBackgroundResource(R.drawable.ic_thumb_down_yellow);
-            row.findViewById(R.id.intel_row_clear).setBackgroundResource(R.drawable.ic_clear_gray55);
+            row.findViewById(R.id.intel_row_clear).setBackgroundResource(R.drawable.ic_clear);
         }
     }
 
