@@ -6,7 +6,7 @@
           app:showAsAction="ifRoom" android:icon="@drawable/ic_mark_read" />
     <item android:id="@+id/menu_search_stories"
           android:title="@string/menu_search_stories"
-          app:showAsAction="ifRoom" android:icon="@drawable/ic_menu_search_gray55" />
+          app:showAsAction="ifRoom" android:icon="@drawable/ic_search" />
     <item android:id="@+id/menu_story_order"
           android:title="@string/menu_story_order">
         <menu>

@@ -112,20 +112,20 @@
 
     <ImageButton
         android:id="@+id/main_menu_button"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:layout_margin="5dp"
-        android:background="@drawable/ic_menu_moreoverflow"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="6dp"
+        android:background="@drawable/ic_more_vertical"
         android:contentDescription="@string/description_menu"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true" />
 
     <ImageButton
         android:id="@+id/main_add_button"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_margin="4dp"
-        android:background="@drawable/ic_menu_add_gray55"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_margin="9dp"
+        android:background="@drawable/ic_add"
         android:contentDescription="@string/menu_add_feed"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true" />
