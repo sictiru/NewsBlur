@@ -40,8 +40,8 @@ class Premium : NbActivity() {
             showActiveSubscriptionDetails(renewalMessage)
         }
 
-        override fun onAvailableSubscription(skuDetails: SkuDetails) {
-            showAvailableSubscriptionDetails(skuDetails)
+        override fun onAvailableSubscriptions(productDetails: List<ProductDetails>) {
+            showAvailableSubscriptionDetails(productDetails)
         }
 
         override fun onBillingConnectionReady() {
@@ -86,23 +86,42 @@ class Premium : NbActivity() {
         binding.containerSub.visibility = View.GONE
     }
 
-    private fun showAvailableSubscriptionDetails(skuDetails: SkuDetails) {
-        val price = (skuDetails.priceAmountMicros / 1000f / 1000f).toDouble()
-        val currency = Currency.getInstance(skuDetails.priceCurrencyCode)
-        val currencySymbol = currency.getSymbol(Locale.getDefault())
-        val pricingText = StringBuilder()
-        pricingText.append(skuDetails.price)
-        pricingText.append(" per year (")
-        pricingText.append(currencySymbol)
-        pricingText.append(String.format(Locale.getDefault(), "%.2f", price / 12))
-        pricingText.append("/month)")
-        binding.textSubTitle.text = skuDetails.title
-        binding.textSubPrice.text = pricingText
-        binding.textLoading.visibility = View.GONE
-        binding.containerSub.visibility = View.VISIBLE
-        binding.containerSub.setOnClickListener {
-            subscriptionManager.purchaseSubscription(this, skuDetails)
+    private fun showAvailableSubscriptionDetails(productDetails: List<ProductDetails>) {
+        productDetails.find { it.productId == AppConstants.PREMIUM_SUB_ID }?.let {
+            showPremiumSubscription(it)
         }
+        productDetails.find { it.productId == AppConstants.PREMIUM_ARCHIVE_SUB_ID }?.let {
+            showPremiumArchiveSubscription(it)
+        }
+    }
+
+    private fun showPremiumSubscription(productDetails: ProductDetails) {
+        val productOffer = productDetails.subscriptionOfferDetails?.firstOrNull()
+        productOffer?.let { offerDetails ->
+            val pricingPhase = offerDetails.pricingPhases.pricingPhaseList.firstOrNull()
+            pricingPhase?.let { pricing ->
+                val price = (pricing.priceAmountMicros / 1000f / 1000f).toDouble()
+                val currency = Currency.getInstance(pricing.priceCurrencyCode)
+                val currencySymbol = currency.getSymbol(Locale.getDefault())
+                val pricingText = StringBuilder()
+                pricingText.append(price)
+                pricingText.append(" per year (")
+                pricingText.append(currencySymbol)
+                pricingText.append(String.format(Locale.getDefault(), "%.2f", price / 12))
+                pricingText.append("/month)")
+                binding.textSubTitle.text = productDetails.title
+                binding.textSubPrice.text = pricingText
+                binding.textLoading.visibility = View.GONE
+                binding.containerSub.visibility = View.VISIBLE
+                binding.containerSub.setOnClickListener {
+                    subscriptionManager.purchaseSubscription(this, productDetails, offerDetails)
+                }
+            }
+        } // TODO hide sub and handle error
+    }
+
+    private fun showPremiumArchiveSubscription(productDetails: ProductDetails) {
+        // TODO
     }
 
     private fun showActiveSubscriptionDetails(renewalMessage: String?) {
