@@ -32,13 +32,24 @@
         <item name="fontFamily">@font/whitney</item>
     </style>
 
-    <style name="selectorFolderBackground">
+    <style name="delimiter">
+        <item name="android:background">@color/gray85</item>
+    </style>
+    <style name="delimiter.dark">
+        <item name="android:background">@color/gray30</item>
+    </style>
+
+    <style name="selectorFolderParent">
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+    </style>
+    <style name="selectorFolderBackground" parent="selectorFolderParent">
         <item name="android:background">@drawable/selector_folder_background</item>
     </style>
-    <style name="selectorFolderBackground.dark">
+    <style name="selectorFolderBackground.dark" parent="selectorFolderParent">
         <item name="android:background">@drawable/dark_selector_folder_background</item>
     </style>
-    <style name="selectorFolderBackground.black">
+    <style name="selectorFolderBackground.black" parent="selectorFolderParent">
         <item name="android:background">@drawable/black_selector_folder_background</item>
     </style>
 
@@ -259,24 +270,14 @@
         <item name="android:textColor">@color/dark_text</item>
     </style>
 
-    <style name="rowBorderTop">
-        <item name="android:background">@color/row_border_top</item>
+    <style name="rowBorder">
+        <item name="android:background">@color/row_border</item>
     </style>
-    <style name="rowBorderTop.dark">
-        <item name="android:background">@color/dark_row_border_top</item>
+    <style name="rowBorder.dark">
+        <item name="android:background">@color/dark_row_border</item>
     </style>
-    <style name="rowBorderTop.black">
-        <item name="android:background">@color/black_row_border_top</item>
-    </style>
-
-    <style name="rowBorderBottom">
-        <item name="android:background">@color/row_border_bottom</item>
-    </style>
-    <style name="rowBorderBottom.dark">
-        <item name="android:background">@color/dark_row_border_bottom</item>
-    </style>
-    <style name="rowBorderBottom.black">
-        <item name="android:background">@color/black_row_border_bottom</item>
+    <style name="rowBorder.black">
+        <item name="android:background">@color/black_row_border</item>
     </style>
 
     <style name="profileCount">
