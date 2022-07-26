@@ -54,7 +54,7 @@ interface SubscriptionManager {
 
 interface SubscriptionsListener {
 
-    fun onActiveSubscription(renewalMessage: String?) {}
+    fun onActiveSubscription(renewalMessage: String?, isPremium: Boolean, isArchive: Boolean) {}
 
     fun onAvailableSubscriptions(productDetails: List<ProductDetails>) {}
 
@@ -174,14 +174,16 @@ class SubscriptionManagerImpl(
     }
 
     override suspend fun syncActiveSubscription() = scope.launch(Dispatchers.Default) {
-        val hasNewsBlurSubscription = PrefsUtils.getIsPremium(context)
+        val isPremium = PrefsUtils.getIsPremium(context)
+        val isArchive = PrefsUtils.getIsArchive(context)
+        val hasNewsBlurSubscription = isPremium || isArchive
         val activePlayStoreSubscription = getActiveSubscriptionAsync().await()
 
         if (hasNewsBlurSubscription || activePlayStoreSubscription != null) {
             listener?.let {
                 val renewalString: String? = getRenewalMessage(activePlayStoreSubscription)
                 withContext(Dispatchers.Main) {
-                    it.onActiveSubscription(renewalString)
+                    it.onActiveSubscription(renewalString, isPremium, isArchive)
                 }
             }
         }
@@ -191,8 +193,9 @@ class SubscriptionManagerImpl(
         }
     }
 
-    override suspend fun hasActiveSubscription(): Boolean =
-            PrefsUtils.getIsPremium(context) || getActiveSubscriptionAsync().await() != null
+    // TODO
+    override suspend fun hasActiveSubscription(): Boolean = false
+//            PrefsUtils.getIsPremium(context) || getActiveSubscriptionAsync().await() != null
 
     override fun saveReceipt(purchase: Purchase) {
         Log.d(this, "saveReceipt: ${purchase.orderId}")

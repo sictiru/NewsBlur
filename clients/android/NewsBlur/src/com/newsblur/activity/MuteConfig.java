@@ -232,7 +232,7 @@ public class MuteConfig extends FeedChooser implements MuteConfigAdapter.FeedSta
     }
 
     private void openUpgradeToPremium() {
-        Intent intent = new Intent(this, Premium.class);
+        Intent intent = new Intent(this, SubscriptionActivity.class);
         startActivity(intent);
         finish();
     }

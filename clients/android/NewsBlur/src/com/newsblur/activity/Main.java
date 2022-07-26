@@ -394,7 +394,7 @@ public class Main extends NbActivity implements StateChangedListener, SwipeRefre
             PrefsUtils.setSelectedTheme(this, ThemeValue.BLACK);
             UIUtils.restartActivity(this);
         } else if (item.getItemId() == R.id.menu_premium_account) {
-            Intent intent = new Intent(this, Premium.class);
+            Intent intent = new Intent(this, SubscriptionActivity.class);
             startActivity(intent);
             return true;
         } else if (item.getItemId() == R.id.menu_mute_sites) {

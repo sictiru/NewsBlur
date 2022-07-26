@@ -15,7 +15,7 @@
         app:showAsAction="never" />
 
     <item android:id="@+id/menu_premium_account"
-        android:title="@string/menu_premium_account"
+        android:title="@string/menu_subscription"
         app:showAsAction="never" />
 
     <item android:id="@+id/menu_import_export"

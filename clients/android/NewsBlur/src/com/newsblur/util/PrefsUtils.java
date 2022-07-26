@@ -1006,6 +1006,21 @@ public class PrefsUtils {
         return preferences.getString(PrefConstants.DEFAULT_BROWSER, DefaultBrowser.SYSTEM_DEFAULT.toString());
     }
 
+    public static void setArchive(Context context, boolean isArchive, Long archiveExpire) {
+        SharedPreferences prefs = context.getSharedPreferences(PrefConstants.PREFERENCES, 0);
+        Editor editor = prefs.edit();
+        editor.putBoolean(PrefConstants.IS_ARCHIVE, isArchive);
+        if (archiveExpire != null) {
+            editor.putLong(PrefConstants.PREMIUM_EXPIRE, archiveExpire);
+        }
+        editor.commit();
+    }
+
+    public static boolean getIsArchive(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(PrefConstants.PREFERENCES, 0);
+        return preferences.getBoolean(PrefConstants.IS_ARCHIVE, false);
+    }
+
     public static void setPremium(Context context, boolean isPremium, Long premiumExpire) {
         SharedPreferences prefs = context.getSharedPreferences(PrefConstants.PREFERENCES, 0);
         Editor editor = prefs.edit();

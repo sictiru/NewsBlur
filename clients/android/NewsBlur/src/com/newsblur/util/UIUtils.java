@@ -577,7 +577,7 @@ public class UIUtils {
     }
 
     public static void startPremiumActivity(Context context) {
-        Intent intent = new Intent(context, Premium.class);
+        Intent intent = new Intent(context, SubscriptionActivity.class);
         context.startActivity(intent);
     }
 
