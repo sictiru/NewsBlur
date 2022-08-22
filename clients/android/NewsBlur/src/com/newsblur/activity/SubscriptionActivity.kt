@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.text.util.Linkify
 import android.view.View
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.android.billingclient.api.ProductDetails
 import com.newsblur.R
@@ -15,10 +16,7 @@ import com.newsblur.di.IconLoader
 import com.newsblur.subscription.SubscriptionManager
 import com.newsblur.subscription.SubscriptionManagerImpl
 import com.newsblur.subscription.SubscriptionsListener
-import com.newsblur.util.AppConstants
-import com.newsblur.util.BetterLinkMovementMethod
-import com.newsblur.util.ImageLoader
-import com.newsblur.util.UIUtils
+import com.newsblur.util.*
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 import javax.inject.Inject
@@ -38,7 +36,7 @@ class SubscriptionActivity : NbActivity() {
     private val subscriptionManagerListener = object : SubscriptionsListener {
 
         override fun onActiveSubscription(renewalMessage: String?, isPremium: Boolean, isArchive: Boolean) {
-            showActiveSubscriptionDetails(renewalMessage)
+            showActiveSubscriptionDetails(renewalMessage, isPremium, isArchive)
         }
 
         override fun onAvailableSubscriptions(productDetails: List<ProductDetails>) {
@@ -74,7 +72,6 @@ class SubscriptionActivity : NbActivity() {
                     true
                 }
         binding.textPolicies.text = UIUtils.fromHtml(getString(R.string.premium_policies))
-//        binding.textSubTitle.paintFlags = binding.textSubTitle.paintFlags or Paint.UNDERLINE_TEXT_FLAG
         iconLoader.displayImage(AppConstants.LYRIC_PHOTO_URL, bindingPremium.imgShiloh)
     }
 
@@ -84,9 +81,15 @@ class SubscriptionActivity : NbActivity() {
     }
 
     private fun showSubscriptionDetailsError(message: String?) {
-//        binding.textLoading.text = message ?: getString(R.string.premium_subscription_details_error)
-//        binding.textLoading.visibility = View.VISIBLE
-//        binding.containerSub.visibility = View.GONE
+        message ?: getString(R.string.subscription_details_error).let {
+            bindingPremium.textLoading.text = it
+            bindingPremium.textLoading.setViewVisible()
+            bindingPremium.containerDetails.setViewGone()
+
+            bindingArchive.textLoading.text = it
+            bindingArchive.textLoading.setViewVisible()
+            bindingArchive.containerDetails.setViewGone()
+        }
     }
 
     private fun showAvailableSubscriptionDetails(productDetails: List<ProductDetails>) {
@@ -95,8 +98,11 @@ class SubscriptionActivity : NbActivity() {
         } ?: hidePremiumSubscription()
         productDetails.find { it.productId == AppConstants.PREMIUM_ARCHIVE_SUB_ID }?.let {
             showArchiveSubscription(it)
+        } ?: hideArchiveSubscription()
+
+        if (!bindingPremium.root.isVisible && !bindingArchive.root.isVisible) {
+            binding.textNoSubscriptions.setViewVisible()
         }
-        // TODO check if any sub is visible
     }
 
     private fun showPremiumSubscription(productDetails: ProductDetails) {
@@ -106,8 +112,8 @@ class SubscriptionActivity : NbActivity() {
             pricingPhase?.let { pricing ->
                 bindingPremium.textSubPrice.text = extractProductPricing(pricing)
                 bindingPremium.textLoading.visibility = View.GONE
-                bindingPremium.containerSub.visibility = View.VISIBLE
-                bindingPremium.containerSub.setOnClickListener {
+                bindingPremium.containerDetails.visibility = View.VISIBLE
+                bindingPremium.containerPrice.setOnClickListener {
                     subscriptionManager.purchaseSubscription(this, productDetails, offerDetails)
                 }
             }
@@ -121,8 +127,8 @@ class SubscriptionActivity : NbActivity() {
             pricingPhase?.let { pricing ->
                 bindingArchive.textSubPrice.text = extractProductPricing(pricing)
                 bindingArchive.textLoading.visibility = View.GONE
-                bindingArchive.containerSub.visibility = View.VISIBLE
-                bindingArchive.containerSub.setOnClickListener {
+                bindingArchive.containerDetails.visibility = View.VISIBLE
+                bindingArchive.containerPrice.setOnClickListener {
                     subscriptionManager.purchaseSubscription(this, productDetails, offerDetails)
                 }
             }
@@ -130,24 +136,31 @@ class SubscriptionActivity : NbActivity() {
     }
 
     private fun hidePremiumSubscription() {
-        bindingPremium.containerSub.visibility = View.GONE
+        bindingPremium.root.visibility = View.GONE
     }
 
     private fun hideArchiveSubscription() {
-        bindingArchive.containerSub.visibility = View.GONE
+        bindingArchive.root.visibility = View.GONE
     }
 
-    private fun showActiveSubscriptionDetails(renewalMessage: String?) {
-//        binding.containerGoingPremium.visibility = View.GONE
-//        binding.containerSubscribed.visibility = View.VISIBLE
+    private fun showActiveSubscriptionDetails(renewalMessage: String?, isPremium: Boolean, isArchive: Boolean) {
+        if (isPremium) {
+            bindingPremium.containerPrice.setViewGone()
+            bindingPremium.containerActivated.setViewVisible()
+            binding.containerSubscribed.setViewVisible()
+        } else if (isArchive) {
+            bindingArchive.containerPrice.setViewGone()
+            bindingArchive.containerActivated.setViewVisible()
+            binding.containerSubscribed.setViewVisible()
+        }
 
         if (!renewalMessage.isNullOrEmpty()) {
             binding.textSubscriptionRenewal.text = renewalMessage
-            binding.textSubscriptionRenewal.visibility = View.VISIBLE
+            binding.textSubscriptionRenewal.setViewVisible()
         }
     }
 
-    private fun extractProductPricing(pricing: ProductDetails.PricingPhase) : String {
+    private fun extractProductPricing(pricing: ProductDetails.PricingPhase): String {
         val price = (pricing.priceAmountMicros / 1000f / 1000f).toDouble()
         val currency = Currency.getInstance(pricing.priceCurrencyCode)
         val currencySymbol = currency.getSymbol(Locale.getDefault())

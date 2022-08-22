@@ -304,7 +304,9 @@
     <string name="premium_subscription_title">NewsBlur Premium Subscription</string>
     <string name="archive_subscription_title">NewsBlur Premium Archive</string>
     <string name="premium_subscription_price">$35.99 per year ($3.00/month)</string>
-    <string name="premium_subscription_details_error">Error retrieving subscription details</string>
+    <string name="premium_subscription_active">Your premium subscription is active</string>
+    <string name="subscription_details_error">Error retrieving subscription details</string>
+    <string name="no_subscription_available">No subscription available</string>
 
     <string name="premium_enable_sites">Enable every site by going premium</string>
     <string name="premium_sync">Sites updated up to 5x more often</string>
@@ -322,6 +324,7 @@
     <string name="archive_back_filled">Feeds that support paging are back-filled in for a complete archive</string>
     <string name="archive_export_trained_stories">Export trained stories from folders as RSS feeds</string>
     <string name="archive_stories_unread_forever">Stories can stay unread forever</string>
+    <string name="archive_subscription_active">Your archive subscription is active</string>
 
     <string name="settings_cat_offline">Offline reading</string>
     <string name="settings_enable_offline">Download stories</string>

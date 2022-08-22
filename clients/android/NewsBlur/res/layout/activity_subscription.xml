@@ -51,6 +51,17 @@
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_no_subscriptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_horizontal"
+                android:text="@string/no_subscription_available"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
             <include
                 android:id="@+id/container_premium_subscription"
                 layout="@layout/view_premium_subscription" />

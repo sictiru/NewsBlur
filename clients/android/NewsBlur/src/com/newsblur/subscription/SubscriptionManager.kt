@@ -36,6 +36,7 @@ interface SubscriptionManager {
      * Launch the billing flow overlay for a specific subscription.
      * @param activity Activity on which the billing overlay will be displayed.
      * @param productDetails Product details for the intended purchases.
+     * @param offerDetails Offer details for subscription.
      */
     fun purchaseSubscription(activity: Activity, productDetails: ProductDetails, offerDetails: ProductDetails.SubscriptionOfferDetails)
 
@@ -154,8 +155,16 @@ class SubscriptionManagerImpl(
 
     override fun syncSubscriptionState() {
         scope.launch(Dispatchers.Default) {
-            if (hasActiveSubscription()) syncActiveSubscription()
-            else syncAvailableSubscription()
+            val productDetails = getAvailableSubscriptionAsync().await()
+            withContext(Dispatchers.Main) {
+                if (productDetails.isNotEmpty()) {
+                    listener?.onAvailableSubscriptions(productDetails)
+                } else {
+                    listener?.onBillingConnectionError()
+                }
+            }
+
+            syncActiveSubscription()
         }
     }
 
@@ -193,9 +202,10 @@ class SubscriptionManagerImpl(
         }
     }
 
-    // TODO
-    override suspend fun hasActiveSubscription(): Boolean = false
-//            PrefsUtils.getIsPremium(context) || getActiveSubscriptionAsync().await() != null
+    override suspend fun hasActiveSubscription(): Boolean =
+            PrefsUtils.getIsPremium(context) ||
+                    PrefsUtils.getIsArchive(context) ||
+                    getActiveSubscriptionAsync().await() != null
 
     override fun saveReceipt(purchase: Purchase) {
         Log.d(this, "saveReceipt: ${purchase.orderId}")

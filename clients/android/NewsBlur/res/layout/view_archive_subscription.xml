@@ -142,6 +142,7 @@
     </FrameLayout>
 
     <FrameLayout
+        android:id="@+id/container_price"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
@@ -155,7 +156,7 @@
             android:src="@drawable/ic_hand_pointing_right" />
 
         <LinearLayout
-            android:id="@+id/container_sub"
+            android:id="@+id/container_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
@@ -190,7 +191,32 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/loading"
-            android:textSize="18sp" />
+            android:textSize="16sp" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/container_activated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:paddingHorizontal="16dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_check_green" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="40dp"
+            android:text="@string/archive_subscription_active"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
     </FrameLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>
