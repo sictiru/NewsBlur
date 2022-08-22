@@ -170,25 +170,42 @@ class SubscriptionManagerImpl(
 
     override fun purchaseSubscription(activity: Activity, productDetails: ProductDetails, offerDetails: ProductDetails.SubscriptionOfferDetails) {
         Log.d(this, "launchBillingFlow for productId: ${productDetails.productId}")
-        val productDetailsParamsList = listOf(
-                BillingFlowParams.ProductDetailsParams.newBuilder()
-                        .setProductDetails(productDetails)
-                        .setOfferToken(offerDetails.offerToken)
-                        .build()
-        )
-        val billingFlowParams = BillingFlowParams.newBuilder()
-                .setProductDetailsParamsList(productDetailsParamsList)
-                .build()
-        billingClient.launchBillingFlow(activity, billingFlowParams)
+        scope.launch(Dispatchers.Default) {
+            val productDetailsParamsList = listOf(
+                    BillingFlowParams.ProductDetailsParams.newBuilder()
+                            .setProductDetails(productDetails)
+                            .setOfferToken(offerDetails.offerToken)
+                            .build()
+            )
+            val billingFlowParamsBuilder = BillingFlowParams.newBuilder()
+                    .setProductDetailsParamsList(productDetailsParamsList)
+
+            // check if there is an active subscription
+            val activeSubscription = getActiveSubscriptionAsync().await()
+            activeSubscription?.let {
+                // check if it's gonna be a subscription upgrade or downgrade
+                // this should be the case if there is an active subscription
+                if (it.products.firstOrNull() != productDetails.productId) {
+                    billingFlowParamsBuilder.setSubscriptionUpdateParams(
+                            BillingFlowParams.SubscriptionUpdateParams.newBuilder()
+                                    .setOldPurchaseToken(it.purchaseToken)
+                                    .setReplaceProrationMode(BillingFlowParams.ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE)
+                                    .build()
+                    )
+                }
+            }
+            withContext(Dispatchers.Main) {
+                billingClient.launchBillingFlow(activity, billingFlowParamsBuilder.build())
+            }
+        }
     }
 
     override suspend fun syncActiveSubscription() = scope.launch(Dispatchers.Default) {
         val isPremium = PrefsUtils.getIsPremium(context)
         val isArchive = PrefsUtils.getIsArchive(context)
-        val hasNewsBlurSubscription = isPremium || isArchive
         val activePlayStoreSubscription = getActiveSubscriptionAsync().await()
 
-        if (hasNewsBlurSubscription || activePlayStoreSubscription != null) {
+        if (isPremium || isArchive || activePlayStoreSubscription != null) {
             listener?.let {
                 val renewalString: String? = getRenewalMessage(activePlayStoreSubscription)
                 withContext(Dispatchers.Main) {
@@ -197,8 +214,12 @@ class SubscriptionManagerImpl(
             }
         }
 
-        if (!hasNewsBlurSubscription && activePlayStoreSubscription != null) {
-            saveReceipt(activePlayStoreSubscription)
+        activePlayStoreSubscription?.let { purchase ->
+            if (purchase.isPremiumSub() && !isPremium) {
+                saveReceipt(purchase)
+            } else if (purchase.isArchiveSub() && !isArchive) {
+                saveReceipt(purchase)
+            }
         }
     }
 
@@ -222,17 +243,6 @@ class SubscriptionManagerImpl(
                     }
                 }
         )
-    }
-
-    private suspend fun syncAvailableSubscription() = scope.launch(Dispatchers.Default) {
-        val productDetails = getAvailableSubscriptionAsync().await()
-        withContext(Dispatchers.Main) {
-            if (productDetails.isNotEmpty()) {
-                listener?.onAvailableSubscriptions(productDetails)
-            } else {
-                listener?.onBillingConnectionError()
-            }
-        }
     }
 
     private fun getAvailableSubscriptionAsync(): Deferred<List<ProductDetails>> {
@@ -321,4 +331,8 @@ class SubscriptionManagerImpl(
             else -> null
         }
     }
+
+    private fun Purchase.isPremiumSub() = this.products.firstOrNull() == AppConstants.PREMIUM_SUB_ID
+
+    private fun Purchase.isArchiveSub() = this.products.firstOrNull() == AppConstants.PREMIUM_ARCHIVE_SUB_ID
 }
