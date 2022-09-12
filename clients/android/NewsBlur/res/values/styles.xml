@@ -448,4 +448,9 @@
         <item name="cornerSize">10%</item>
     </style>
 
+    <style name="toggleButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
 </resources>

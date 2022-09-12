@@ -281,12 +281,14 @@
     <string name="menu_mute_sites">Mute Sites…</string>
     <string name="mute_sites">Mute Sites</string>
     <string name="menu_widget">Widget…</string>
+    <string name="menu_notifications">Notifications…</string>
     <string name="widget">Widget</string>
     <string name="title_widget_setup">Tap to setup in NewsBlur</string>
     <string name="title_no_subscriptions">No active subscriptions detected</string>
     <string name="title_widget_loading">Loading…</string>
 
     <string name="import_export_title">Import/Export OPML</string>
+    <string name="notifications_title">Notifications</string>
     
     <string name="premium_subscribers_folder">Reading by folder is only available to</string>
     <string name="premium_subscribers_search">Search is only available to</string>

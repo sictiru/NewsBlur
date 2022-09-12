@@ -141,6 +141,9 @@ public class Main extends NbActivity implements StateChangedListener, SwipeRefre
             }
             startActivity(intent);
         }
+
+
+        startActivity(new Intent(this, NotificationsActivity.class));
 	}
 
     @Override
@@ -404,6 +407,10 @@ public class Main extends NbActivity implements StateChangedListener, SwipeRefre
         } else if (item.getItemId() == R.id.menu_import_export) {
 		    Intent intent = new Intent(this, ImportExportActivity.class);
 		    startActivity(intent);
+            return true;
+        } else if (item.getItemId() == R.id.menu_notifications) {
+            Intent intent = new Intent(this, NotificationsActivity.class);
+            startActivity(intent);
             return true;
         }
 		return false;
