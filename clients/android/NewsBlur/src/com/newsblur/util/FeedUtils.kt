@@ -288,11 +288,11 @@ class FeedUtils(
         NBScope.executeAsyncTask(
                 doInBackground = {
                     if (focusOnly) {
-                        feed.setNotifyFocus()
+//                        feed.setNotifyFocus()
                     } else {
-                        feed.setNotifyUnread()
+//                        feed.setNotifyUnread()
                     }
-                    feed.enableAndroidNotifications(enable)
+//                    feed.enableAndroidNotifications(enable)
                     dbHelper.updateFeed(feed)
                     val ra = ReadingAction.setNotify(feed.feedId, feed.notificationTypes, feed.notificationFilter)
                     doAction(ra, context)

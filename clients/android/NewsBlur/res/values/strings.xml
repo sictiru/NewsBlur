@@ -713,4 +713,9 @@
     <string name="add_feed">Add feed</string>
 
     <string name="story_author">• %s</string>
+
+    <string name="notification_email">Email</string>
+    <string name="notification_web">Web</string>
+    <string name="notification_ios">iOS</string>
+    <string name="notification_android">Android</string>
 </resources>

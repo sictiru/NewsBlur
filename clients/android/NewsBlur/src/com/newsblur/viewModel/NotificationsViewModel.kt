@@ -26,11 +26,17 @@ class NotificationsViewModel
         loadFeeds()
     }
 
+    fun updateFeed(feed: Feed) {
+        viewModelScope.launch(Dispatchers.IO) {
+            dbHelper.updateFeed(feed)
+        }
+    }
+
     private fun loadFeeds() {
         viewModelScope.launch(Dispatchers.IO) {
             launch {
                 val cursor = dbHelper.getFeedsCursor(cancellationSignal)
-                val feeds = extractFeeds(cursor)
+                val feeds = extractFeeds(cursor).filterValues(notificationFeedFilter)
                 _feeds.postValue(feeds)
             }
         }
@@ -43,6 +49,10 @@ class NotificationsViewModel
             val feed = Feed.fromCursor(cursor)
             this[feed.feedId] = feed
         }
+    }
+
+    private val notificationFeedFilter: (Feed) -> Boolean = {
+        it.active && !it.notificationFilter.isNullOrBlank()
     }
 
     override fun onCleared() {

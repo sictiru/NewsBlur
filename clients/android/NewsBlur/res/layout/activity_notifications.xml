@@ -7,17 +7,7 @@
 
     <include layout="@layout/toolbar_newsblur" />
 
-    <TextView
-        android:id="@+id/text_email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="2dp"
-        android:background="@drawable/intel_toggle_background_selector"
-        android:gravity="center"
-        android:text="Email" />
-
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_marginTop="48dp"
         android:id="@+id/recycler_view_feeds"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.newsblur.R
 import com.newsblur.databinding.ActivityNotificationsBinding
 import com.newsblur.di.IconLoader
+import com.newsblur.domain.Feed
 import com.newsblur.util.ImageLoader
 import com.newsblur.util.UIUtils
 import com.newsblur.viewModel.NotificationsViewModel
@@ -13,7 +14,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class NotificationsActivity : NbActivity() {
+class NotificationsActivity : NbActivity(), NotificationsAdapter.Listener {
 
     @IconLoader
     @Inject
@@ -35,14 +36,19 @@ class NotificationsActivity : NbActivity() {
 
     private fun setupUI() {
         UIUtils.setupToolbar(this, R.drawable.logo, getString(R.string.notifications_title), true)
-        adapter = NotificationsAdapter(imageLoader).also {
+        adapter = NotificationsAdapter(imageLoader, this).also {
             binding.recyclerViewFeeds.adapter = it
         }
     }
 
     private fun setupListeners() {
         viewModel.feeds.observe(this) {
+            // TODO empty notifications
             adapter.refreshFeeds(it.values.toList())
         }
+    }
+
+    override fun onFeedUpdated(feed: Feed) {
+        viewModel.updateFeed(feed)
     }
 }

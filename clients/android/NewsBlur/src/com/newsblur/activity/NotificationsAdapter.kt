@@ -1,16 +1,26 @@
 package com.newsblur.activity
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.newsblur.R
 import com.newsblur.databinding.ViewNotificationsItemBinding
 import com.newsblur.domain.Feed
+import com.newsblur.util.FeedExt
+import com.newsblur.util.FeedExt.disableNotification
+import com.newsblur.util.FeedExt.enableNotification
+import com.newsblur.util.FeedExt.isNotifyAndroid
+import com.newsblur.util.FeedExt.isNotifyEmail
+import com.newsblur.util.FeedExt.isNotifyFocus
+import com.newsblur.util.FeedExt.isNotifyIOS
+import com.newsblur.util.FeedExt.isNotifyUnread
+import com.newsblur.util.FeedExt.isNotifyWeb
+import com.newsblur.util.FeedExt.setNotifyFocus
+import com.newsblur.util.FeedExt.setNotifyUnread
 import com.newsblur.util.ImageLoader
 
 class NotificationsAdapter(
         private val imageLoader: ImageLoader,
+        private val listener: Listener,
 ) : RecyclerView.Adapter<NotificationsAdapter.ViewHolder>() {
 
     private val feeds: MutableList<Feed> = mutableListOf()
@@ -20,7 +30,7 @@ class NotificationsAdapter(
         return ViewHolder(binding, imageLoader)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(feeds[position])
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(feeds[position], listener)
 
     override fun getItemCount(): Int = feeds.size
 
@@ -32,40 +42,54 @@ class NotificationsAdapter(
 
     class ViewHolder(val binding: ViewNotificationsItemBinding, val imageLoader: ImageLoader) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(feed: Feed) {
-            binding.toggleUnread.isEnabled = false
+        fun bind(feed: Feed, listener: Listener) {
             binding.textTitle.text = feed.title
             imageLoader.displayImage(feed.faviconUrl, binding.imgIcon, binding.imgIcon.height, true)
-            binding.toggleUnread.setOnClickListener {
-                binding.toggleUnread.isEnabled = !binding.toggleUnread.isEnabled
+
+            with(binding.groupFilter) {
+                if (feed.isNotifyUnread()) check(binding.btnUnread.id)
+                else if (feed.isNotifyFocus()) check(binding.btnFocus.id)
             }
-            binding.textEmail.addOnCheckedChangeListener { button, isChecked ->
-                Log.d("sictiru", "is checked $isChecked")
+
+            with(binding.groupPlatform) {
+                if (feed.isNotifyEmail()) check(binding.btnEmail.id)
+                if (feed.isNotifyWeb()) check(binding.btnWeb.id)
+                if (feed.isNotifyIOS()) check(binding.btnIos.id)
+                if (feed.isNotifyAndroid()) check(binding.btnAndroid.id)
+            }
+
+            binding.groupFilter.addOnButtonCheckedListener { _, checkedId, isChecked ->
+                updateFilter(feed, checkedId, isChecked)
+                listener.onFeedUpdated(feed)
+            }
+            binding.groupPlatform.addOnButtonCheckedListener { _, checkedId, isChecked ->
+                updatePlatform(feed, checkedId, isChecked)
+                listener.onFeedUpdated(feed)
+            }
+        }
+
+        private fun updateFilter(feed: Feed, checkedBtnId: Int, isChecked: Boolean) {
+            when (checkedBtnId) {
+                binding.btnUnread.id -> if (isChecked) feed.setNotifyUnread()
+                binding.btnFocus.id -> if (isChecked) feed.setNotifyFocus()
+            }
+        }
+
+        private fun updatePlatform(feed: Feed, checkedBtnId: Int, isChecked: Boolean) {
+            when (checkedBtnId) {
+                binding.btnEmail.id -> FeedExt.NOTIFY_EMAIL
+                binding.btnWeb.id -> FeedExt.NOTIFY_WEB
+                binding.btnIos.id -> FeedExt.NOTIFY_IOS
+                binding.btnIos.id -> FeedExt.NOTIFY_ANDROID
+                else -> null
+            }?.let {
+                if (isChecked) feed.enableNotification(it)
+                else feed.disableNotification(it)
             }
         }
     }
 
     interface Listener {
-        fun onNotificationTypeClick(feed: Feed, type: NotificationType)
-
-        fun onNotificationSettingClick(feed: Feed, setting: NotificationSetting)
-    }
-
-    sealed class NotificationSetting {
-        abstract val isEnabled: Boolean
-
-        class Android(override val isEnabled: Boolean) : NotificationSetting()
-
-        class IOS(override val isEnabled: Boolean) : NotificationSetting()
-
-        class Email(override val isEnabled: Boolean) : NotificationSetting()
-
-        class Web(override val isEnabled: Boolean) : NotificationSetting()
-    }
-
-    sealed class NotificationType {
-        object Unread : NotificationType()
-
-        object Focus : NotificationType()
+        fun onFeedUpdated(feed: Feed)
     }
 }
