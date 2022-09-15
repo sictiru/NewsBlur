@@ -41,7 +41,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_unread"
-            style="@style/toggleButton"
+            style="?toggleButton"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:text="@string/state_unread"
@@ -51,7 +51,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_focus"
-            style="@style/toggleButton"
+            style="?toggleButton"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:text="@string/state_focus"
@@ -70,7 +70,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_email"
-            style="@style/toggleButton"
+            style="?toggleButton"
             android:layout_width="wrap_content"
             android:layout_marginEnd="2dp"
             android:layout_weight="1"
@@ -80,7 +80,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_web"
-            style="@style/toggleButton"
+            style="?toggleButton"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
@@ -88,7 +88,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_ios"
-            style="@style/toggleButton"
+            style="?toggleButton"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
@@ -96,7 +96,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_android"
-            style="@style/toggleButton"
+            style="?toggleButton"
             android:layout_width="wrap_content"
             android:layout_weight="1"
             android:gravity="center"

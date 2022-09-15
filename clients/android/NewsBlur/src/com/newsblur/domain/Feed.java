@@ -101,7 +101,7 @@ public class Feed implements Comparable<Feed>, Serializable {
 		values.put(DatabaseConstants.FEED_TITLE, title);
 		values.put(DatabaseConstants.FEED_UPDATED_SECONDS, lastUpdated);
         values.put(DatabaseConstants.FEED_NOTIFICATION_TYPES, DatabaseConstants.flattenStringList(notificationTypes));
-		values.put(DatabaseConstants.FEED_NOTIFICATION_FILTER, notificationFilter);
+        values.put(DatabaseConstants.FEED_NOTIFICATION_FILTER, notificationFilter);
         values.put(DatabaseConstants.FEED_FETCH_PENDING, fetchPending);
 		return values;
 	}
@@ -175,6 +175,6 @@ public class Feed implements Comparable<Feed>, Serializable {
         };
     }
 
-	public static String NOTIFY_FILTER_UNREAD = "unread";
+    public static String NOTIFY_FILTER_UNREAD = "unread";
     public static String NOTIFY_FILTER_FOCUS = "focus";
 }
