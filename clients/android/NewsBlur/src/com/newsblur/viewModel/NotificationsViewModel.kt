@@ -1,5 +1,6 @@
 package com.newsblur.viewModel
 
+import android.content.Context
 import android.database.Cursor
 import android.os.CancellationSignal
 import androidx.lifecycle.LiveData
@@ -8,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.newsblur.database.BlurDatabaseHelper
 import com.newsblur.domain.Feed
+import com.newsblur.util.FeedUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -15,7 +17,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotificationsViewModel
-@Inject constructor(private val dbHelper: BlurDatabaseHelper) : ViewModel() {
+@Inject constructor(
+        private val dbHelper: BlurDatabaseHelper,
+        private val feedUtils: FeedUtils,
+        ) : ViewModel() {
 
     private val cancellationSignal = CancellationSignal()
 
@@ -26,9 +31,9 @@ class NotificationsViewModel
         loadFeeds()
     }
 
-    fun updateFeed(feed: Feed) {
+    fun updateFeed(context: Context, feed: Feed) {
         viewModelScope.launch(Dispatchers.IO) {
-            dbHelper.updateFeed(feed)
+            feedUtils.updateFeedNotifications(context, feed)
         }
     }
 

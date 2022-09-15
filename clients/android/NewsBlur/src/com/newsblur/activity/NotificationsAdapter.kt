@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.newsblur.databinding.ViewNotificationsItemBinding
 import com.newsblur.domain.Feed
 import com.newsblur.util.FeedExt
-import com.newsblur.util.FeedExt.disableNotification
-import com.newsblur.util.FeedExt.enableNotification
+import com.newsblur.util.FeedExt.disableNotificationType
+import com.newsblur.util.FeedExt.enableNotificationType
 import com.newsblur.util.FeedExt.isNotifyAndroid
 import com.newsblur.util.FeedExt.isNotifyEmail
 import com.newsblur.util.FeedExt.isNotifyFocus
@@ -34,7 +34,7 @@ class NotificationsAdapter(
 
     override fun getItemCount(): Int = feeds.size
 
-    fun refreshFeeds(feeds: List<Feed>) {
+    fun refreshFeeds(feeds: Collection<Feed>) {
         this.feeds.clear()
         this.feeds.addAll(feeds)
         this.notifyItemRangeInserted(0, feeds.size)
@@ -83,8 +83,8 @@ class NotificationsAdapter(
                 binding.btnIos.id -> FeedExt.NOTIFY_ANDROID
                 else -> null
             }?.let {
-                if (isChecked) feed.enableNotification(it)
-                else feed.disableNotification(it)
+                if (isChecked) feed.enableNotificationType(it)
+                else feed.disableNotificationType(it)
             }
         }
     }

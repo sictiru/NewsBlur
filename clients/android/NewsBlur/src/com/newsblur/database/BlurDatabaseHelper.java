@@ -25,7 +25,6 @@ import com.newsblur.network.domain.CommentResponse;
 import com.newsblur.network.domain.StoriesResponse;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedSet;
-import com.newsblur.util.FeedExt;
 import com.newsblur.util.PrefsUtils;
 import com.newsblur.util.ReadingAction;
 import com.newsblur.util.ReadFilter;
@@ -1115,8 +1114,8 @@ public class BlurDatabaseHelper {
 
     public Set<String> getNotifyFeeds() {
         String q = "SELECT " + DatabaseConstants.FEED_ID + " FROM " + DatabaseConstants.FEED_TABLE +
-                   " WHERE " + DatabaseConstants.FEED_NOTIFICATION_FILTER + " = '" + FeedExt.NOTIFY_FILTER_FOCUS + "'" +
-                   " OR " + DatabaseConstants.FEED_NOTIFICATION_FILTER + " = '" + FeedExt.NOTIFY_FILTER_UNREAD + "'";
+                   " WHERE " + DatabaseConstants.FEED_NOTIFICATION_FILTER + " = '" + Feed.NOTIFY_FILTER_FOCUS + "'" +
+                   " OR " + DatabaseConstants.FEED_NOTIFICATION_FILTER + " = '" + Feed.NOTIFY_FILTER_UNREAD + "'";
         Cursor c = dbRO.rawQuery(q, null);
         Set<String> feedIds = new HashSet<String>(c.getCount());
         while (c.moveToNext()) {

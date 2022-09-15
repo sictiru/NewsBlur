@@ -141,9 +141,6 @@ public class Main extends NbActivity implements StateChangedListener, SwipeRefre
             }
             startActivity(intent);
         }
-
-
-        startActivity(new Intent(this, NotificationsActivity.class));
 	}
 
     @Override

@@ -174,4 +174,7 @@ public class Feed implements Comparable<Feed>, Serializable {
             }
         };
     }
+
+	public static String NOTIFY_FILTER_UNREAD = "unread";
+    public static String NOTIFY_FILTER_FOCUS = "focus";
 }

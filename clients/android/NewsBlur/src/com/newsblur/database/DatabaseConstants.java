@@ -8,7 +8,7 @@ import android.provider.BaseColumns;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import com.newsblur.util.FeedExt;
+import com.newsblur.domain.Feed;
 import com.newsblur.util.ReadFilter;
 import com.newsblur.util.StateFilter;
 import com.newsblur.util.StoryOrder;
@@ -380,14 +380,14 @@ public class DatabaseConstants {
 
     public static String NOTIFY_FOCUS_STORY_QUERY = 
         STORY_QUERY_BASE_1 +
-        STORY_FEED_ID + " IN (SELECT " + FEED_ID + " FROM " + FEED_TABLE + " WHERE " + FEED_NOTIFICATION_FILTER + " = '" + FeedExt.NOTIFY_FILTER_FOCUS + "')" +
+        STORY_FEED_ID + " IN (SELECT " + FEED_ID + " FROM " + FEED_TABLE + " WHERE " + FEED_NOTIFICATION_FILTER + " = '" + Feed.NOTIFY_FILTER_FOCUS + "')" +
         " AND " + STORY_INTELLIGENCE_TOTAL + " > 0 " +
         STORY_QUERY_BASE_2 +
         " ORDER BY " + STORY_TIMESTAMP + " DESC";
 
     public static String NOTIFY_UNREAD_STORY_QUERY = 
         STORY_QUERY_BASE_1 +
-        STORY_FEED_ID + " IN (SELECT " + FEED_ID + " FROM " + FEED_TABLE + " WHERE " + FEED_NOTIFICATION_FILTER + " = '" + FeedExt.NOTIFY_FILTER_UNREAD + "')" +
+        STORY_FEED_ID + " IN (SELECT " + FEED_ID + " FROM " + FEED_TABLE + " WHERE " + FEED_NOTIFICATION_FILTER + " = '" + Feed.NOTIFY_FILTER_UNREAD + "')" +
         " AND " + STORY_INTELLIGENCE_TOTAL + " >= 0 " +
         STORY_QUERY_BASE_2 +
         " ORDER BY " + STORY_TIMESTAMP + " DESC";

@@ -718,4 +718,5 @@
     <string name="notification_web">Web</string>
     <string name="notification_ios">iOS</string>
     <string name="notification_android">Android</string>
+    <string name="no_feed_notifications">No feed notifications</string>
 </resources>

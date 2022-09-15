@@ -16,6 +16,7 @@ import com.newsblur.domain.Feed;
 import com.newsblur.fragment.DeleteFeedFragment;
 import com.newsblur.fragment.FeedIntelTrainerFragment;
 import com.newsblur.fragment.RenameDialogFragment;
+import com.newsblur.util.FeedExt;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.PrefsUtils;
 import com.newsblur.util.UIUtils;
@@ -116,19 +117,19 @@ public class FeedItemsList extends ItemsList {
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		super.onPrepareOptionsMenu(menu);
-//        if (feed.isNotifyUnread()) {
-//            menu.findItem(R.id.menu_notifications_disable).setChecked(false);
-//            menu.findItem(R.id.menu_notifications_unread).setChecked(true);
-//            menu.findItem(R.id.menu_notifications_focus).setChecked(false);
-//        } else if (feed.isNotifyFocus()) {
-//            menu.findItem(R.id.menu_notifications_disable).setChecked(false);
-//            menu.findItem(R.id.menu_notifications_unread).setChecked(false);
-//            menu.findItem(R.id.menu_notifications_focus).setChecked(true);
-//        } else {
-//            menu.findItem(R.id.menu_notifications_disable).setChecked(true);
-//            menu.findItem(R.id.menu_notifications_unread).setChecked(false);
-//            menu.findItem(R.id.menu_notifications_focus).setChecked(false);
-//        }
+        if (FeedExt.isAndroidNotifyUnread(feed)) {
+            menu.findItem(R.id.menu_notifications_disable).setChecked(false);
+            menu.findItem(R.id.menu_notifications_unread).setChecked(true);
+            menu.findItem(R.id.menu_notifications_focus).setChecked(false);
+        } else if (FeedExt.isAndroidNotifyFocus(feed)) {
+            menu.findItem(R.id.menu_notifications_disable).setChecked(false);
+            menu.findItem(R.id.menu_notifications_unread).setChecked(false);
+            menu.findItem(R.id.menu_notifications_focus).setChecked(true);
+        } else {
+            menu.findItem(R.id.menu_notifications_disable).setChecked(true);
+            menu.findItem(R.id.menu_notifications_unread).setChecked(false);
+            menu.findItem(R.id.menu_notifications_focus).setChecked(false);
+        }
 		return true;
 	}
 

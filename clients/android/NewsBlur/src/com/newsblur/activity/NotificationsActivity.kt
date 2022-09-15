@@ -1,7 +1,6 @@
 package com.newsblur.activity
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.newsblur.R
 import com.newsblur.databinding.ActivityNotificationsBinding
@@ -9,6 +8,8 @@ import com.newsblur.di.IconLoader
 import com.newsblur.domain.Feed
 import com.newsblur.util.ImageLoader
 import com.newsblur.util.UIUtils
+import com.newsblur.util.setViewGone
+import com.newsblur.util.setViewVisible
 import com.newsblur.viewModel.NotificationsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -43,12 +44,19 @@ class NotificationsActivity : NbActivity(), NotificationsAdapter.Listener {
 
     private fun setupListeners() {
         viewModel.feeds.observe(this) {
-            // TODO empty notifications
-            adapter.refreshFeeds(it.values.toList())
+            val feeds = it.values
+            if (feeds.isNotEmpty()) {
+                binding.recyclerViewFeeds.setViewVisible()
+                binding.txtNoNotifications.setViewGone()
+            } else {
+                binding.recyclerViewFeeds.setViewGone()
+                binding.txtNoNotifications.setViewVisible()
+            }
+            adapter.refreshFeeds(feeds)
         }
     }
 
     override fun onFeedUpdated(feed: Feed) {
-        viewModel.updateFeed(feed)
+        viewModel.updateFeed(this, feed)
     }
 }

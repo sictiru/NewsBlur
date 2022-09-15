@@ -12,30 +12,37 @@ object FeedExt {
 
     fun Feed.isNotifyAndroid(): Boolean = isNotify(NOTIFY_ANDROID)
 
-    fun Feed.enableNotification(type: String) {
+    fun Feed.enableNotificationType(type: String) {
         if (notificationTypes == null) notificationTypes = mutableListOf()
         if (!notificationTypes.contains(type)) notificationTypes.add(type)
     }
 
-    fun Feed.disableNotification(type: String) {
+    fun Feed.disableNotificationType(type: String) {
         notificationTypes?.remove(type)
+    }
+
+    fun Feed.disableNotification() {
+        notificationFilter = null
     }
 
     @JvmStatic
     fun Feed.isAndroidNotifyUnread(): Boolean = isNotifyUnread() && isNotifyAndroid()
 
     @JvmStatic
-    fun Feed.isNotifyUnread(): Boolean = notificationFilter == NOTIFY_FILTER_UNREAD
+    fun Feed.isAndroidNotifyFocus(): Boolean = isNotifyFocus() && isNotifyAndroid()
 
     @JvmStatic
-    fun Feed.isNotifyFocus(): Boolean = notificationFilter == NOTIFY_FILTER_FOCUS
+    fun Feed.isNotifyUnread(): Boolean = notificationFilter == Feed.NOTIFY_FILTER_UNREAD
+
+    @JvmStatic
+    fun Feed.isNotifyFocus(): Boolean = notificationFilter == Feed.NOTIFY_FILTER_FOCUS
 
     fun Feed.setNotifyFocus() {
-        notificationFilter = NOTIFY_FILTER_UNREAD
+        notificationFilter = Feed.NOTIFY_FILTER_FOCUS
     }
 
     fun Feed.setNotifyUnread() {
-        notificationFilter = NOTIFY_FILTER_UNREAD
+        notificationFilter = Feed.NOTIFY_FILTER_UNREAD
     }
 
     private fun Feed.isNotify(type: String): Boolean = notificationTypes?.contains(type) ?: false
@@ -44,7 +51,4 @@ object FeedExt {
     const val NOTIFY_WEB = "web"
     const val NOTIFY_IOS = "ios"
     const val NOTIFY_ANDROID = "android"
-
-    const val NOTIFY_FILTER_UNREAD = "unread"
-    const val NOTIFY_FILTER_FOCUS = "focus"
 }
