@@ -5,6 +5,8 @@ import static com.newsblur.service.NBSyncReceiver.UPDATE_STATUS;
 import static com.newsblur.service.NBSyncReceiver.UPDATE_STORY;
 
 import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import android.text.TextUtils;
@@ -29,6 +31,7 @@ import com.newsblur.util.ImageLoader;
 import com.newsblur.util.PrefConstants.ThemeValue;
 import com.newsblur.util.PrefsUtils;
 import com.newsblur.util.ReadFilter;
+import com.newsblur.util.ReadingSession;
 import com.newsblur.util.SpacingStyle;
 import com.newsblur.util.StateFilter;
 import com.newsblur.util.StoryContentPreviewStyle;
@@ -59,6 +62,7 @@ public abstract class ItemsList extends NbActivity {
     public static final String EXTRA_STORY_HASH = "story_hash";
     public static final String EXTRA_WIDGET_STORY = "widget_story";
     public static final String EXTRA_VISIBLE_SEARCH = "visibleSearch";
+    public static final String EXTRA_READING_SESSION = "reading_session";
     private static final String BUNDLE_ACTIVE_SEARCH_QUERY = "activeSearchQuery";
     private ActivityItemslistBinding binding;
 
@@ -66,6 +70,8 @@ public abstract class ItemsList extends NbActivity {
 	protected StateFilter intelState;
 
     protected FeedSet fs;
+    @Nullable
+    protected ReadingSession readingSession;
 	
 	@Override
     protected void onCreate(Bundle bundle) {
@@ -75,6 +81,10 @@ public abstract class ItemsList extends NbActivity {
 
 		fs = (FeedSet) getIntent().getSerializableExtra(EXTRA_FEED_SET);
 		intelState = PrefsUtils.getStateFilter(this);
+
+        if (getIntent().hasExtra(EXTRA_READING_SESSION)) {
+            readingSession = (ReadingSession) getIntent().getSerializableExtra(EXTRA_READING_SESSION);
+        }
 
         // this is not strictly necessary, since our first refresh with the fs will swap in
         // the correct session, but that can be delayed by sync backup, so we try here to
@@ -329,7 +339,7 @@ public abstract class ItemsList extends NbActivity {
 			finish();
 			return true;
 		} else if (item.getItemId() == R.id.menu_mark_all_as_read) {
-            feedUtils.markRead(this, fs, null, null, R.array.mark_all_read_options, true);
+            feedUtils.markRead(this, fs, readingSession, null, null, R.array.mark_all_read_options, true);
 			return true;
 		} else if (item.getItemId() == R.id.menu_story_order_newest) {
 		    updateStoryOrder(StoryOrder.NEWEST);

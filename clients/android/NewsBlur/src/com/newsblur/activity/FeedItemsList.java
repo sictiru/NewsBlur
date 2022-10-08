@@ -3,6 +3,8 @@ package com.newsblur.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +21,7 @@ import com.newsblur.fragment.RenameDialogFragment;
 import com.newsblur.util.FeedExt;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.PrefsUtils;
+import com.newsblur.util.ReadingSession;
 import com.newsblur.util.UIUtils;
 
 public class FeedItemsList extends ItemsList {
@@ -31,11 +34,13 @@ public class FeedItemsList extends ItemsList {
 	private ReviewInfo reviewInfo;
 
     public static void startActivity(Context context, FeedSet feedSet,
-                                     Feed feed, String folderName) {
+                                     Feed feed, String folderName,
+                                     @Nullable ReadingSession readingSession) {
         Intent intent = new Intent(context, FeedItemsList.class);
-        intent.putExtra(ItemsList.EXTRA_FEED_SET, feedSet);
         intent.putExtra(FeedItemsList.EXTRA_FEED, feed);
         intent.putExtra(FeedItemsList.EXTRA_FOLDER_NAME, folderName);
+        intent.putExtra(ItemsList.EXTRA_FEED_SET, feedSet);
+        intent.putExtra(ItemsList.EXTRA_READING_SESSION, readingSession);
         context.startActivity(intent);
     }
 

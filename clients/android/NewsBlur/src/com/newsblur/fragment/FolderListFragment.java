@@ -51,6 +51,7 @@ import com.newsblur.domain.Feed;
 import com.newsblur.domain.Folder;
 import com.newsblur.domain.SavedSearch;
 import com.newsblur.domain.SocialFeed;
+import com.newsblur.util.Session;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedExt;
 import com.newsblur.util.SpacingStyle;
@@ -437,7 +438,8 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
 
 	@Override
     public boolean onGroupClick(ExpandableListView list, View group, int groupPosition, long id) {
-        Intent i = null;
+        FeedSet fs = adapter.getGroup(groupPosition);
+        Intent i;
         if (adapter.isRowAllStories(groupPosition)) {
             if (currentState == StateFilter.SAVED) {
                 // the existence of this row in saved mode is something of a framework artifact and may
@@ -461,12 +463,14 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
             return true;
         } else {
             i = new Intent(getActivity(), FolderItemsList.class);
+            // TODO is the cano folder name what we need?
             String canonicalFolderName = adapter.getGroupFolderName(groupPosition);
+            Session activeSession = new Session(fs, canonicalFolderName, null);
             i.putExtra(FolderItemsList.EXTRA_FOLDER_NAME, canonicalFolderName);
+            i.putExtra(ItemsList.EXTRA_READING_SESSION, adapter.buildReadingSession(activeSession));
             adapter.lastFeedViewedId = null;
             adapter.lastFolderViewed = canonicalFolderName;
         }
-        FeedSet fs = adapter.getGroup(groupPosition);
         i.putExtra(ItemsList.EXTRA_FEED_SET, fs);
         startActivity(i);
 
@@ -541,7 +545,8 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
 
                 feedUtils.currentFolderName = folderName;
             }
-			FeedItemsList.startActivity(getActivity(), fs, feed, folderName);
+            Session activeSession = new Session(fs, folderName, feed);
+			FeedItemsList.startActivity(getActivity(), fs, feed, folderName, adapter.buildReadingSession(activeSession));
             adapter.lastFeedViewedId = feed.feedId;
             adapter.lastFolderViewed = null;
 		}

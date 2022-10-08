@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
+import android.widget.Toast
 import com.newsblur.R
 import com.newsblur.activity.NbActivity
 import com.newsblur.database.BlurDatabaseHelper
@@ -210,10 +211,18 @@ class FeedUtils(
         triggerSync(context)
     }
 
+    fun markRead(activity: NbActivity, fs: FeedSet, olderThan: Long?, newerThan: Long?, choicesRid: Int, finishAfter: Boolean) =
+            markRead(activity, fs, null, olderThan, newerThan, choicesRid, finishAfter)
+
     /**
      * Marks some or all of the stories in a FeedSet as read for an activity, handling confirmation dialogues as necessary.
      */
-    fun markRead(activity: NbActivity, fs: FeedSet, olderThan: Long?, newerThan: Long?, choicesRid: Int, finishAfter: Boolean) {
+    fun markRead(activity: NbActivity, fs: FeedSet, readingSession: ReadingSession?, olderThan: Long?, newerThan: Long?, choicesRid: Int, finishAfter: Boolean) {
+        readingSession?.let {
+            val nextSession = it.getNextSession()
+            Toast.makeText(activity, it.toString(), Toast.LENGTH_SHORT).show()
+        }
+        return
         val ra: ReadingAction = if (fs.isAllNormal && (olderThan != null || newerThan != null)) {
             // the mark-all-read API doesn't support range bounding, so we need to pass each and every
             // feed ID to the API instead.

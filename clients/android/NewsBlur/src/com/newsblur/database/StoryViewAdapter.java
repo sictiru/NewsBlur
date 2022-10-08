@@ -456,7 +456,7 @@ public class StoryViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             case R.id.menu_go_to_feed:
                 FeedSet fs = FeedSet.singleFeed(story.feedId);
                 FeedItemsList.startActivity(context, fs,
-                        feedUtils.getFeed(story.feedId), null);
+                        feedUtils.getFeed(story.feedId), null, null);
                 return true;
             default:
                 return false;
