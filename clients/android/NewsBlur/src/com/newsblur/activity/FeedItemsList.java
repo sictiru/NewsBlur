@@ -21,7 +21,7 @@ import com.newsblur.fragment.RenameDialogFragment;
 import com.newsblur.util.FeedExt;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.PrefsUtils;
-import com.newsblur.util.ReadingSession;
+import com.newsblur.util.SessionDataSource;
 import com.newsblur.util.UIUtils;
 
 public class FeedItemsList extends ItemsList {
@@ -35,12 +35,12 @@ public class FeedItemsList extends ItemsList {
 
     public static void startActivity(Context context, FeedSet feedSet,
                                      Feed feed, String folderName,
-                                     @Nullable ReadingSession readingSession) {
+                                     @Nullable SessionDataSource sessionDataSource) {
         Intent intent = new Intent(context, FeedItemsList.class);
         intent.putExtra(FeedItemsList.EXTRA_FEED, feed);
         intent.putExtra(FeedItemsList.EXTRA_FOLDER_NAME, folderName);
         intent.putExtra(ItemsList.EXTRA_FEED_SET, feedSet);
-        intent.putExtra(ItemsList.EXTRA_READING_SESSION, readingSession);
+        intent.putExtra(ItemsList.EXTRA_SESSION_DATA, sessionDataSource);
         context.startActivity(intent);
     }
 

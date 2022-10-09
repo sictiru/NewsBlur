@@ -46,7 +46,7 @@ import com.newsblur.domain.SocialFeed;
 import com.newsblur.util.Session;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedListOrder;
-import com.newsblur.util.ReadingSession;
+import com.newsblur.util.SessionDataSource;
 import com.newsblur.util.SpacingStyle;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.ImageLoader;
@@ -977,7 +977,7 @@ public class FolderListAdapter extends BaseExpandableListAdapter {
         this.spacingStyle = spacingStyle;
     }
 
-    public ReadingSession buildReadingSession(Session activeSession) {
-        return new ReadingSession(activeSession, activeFolderNames, activeFolderChildren);
+    public SessionDataSource buildSessionDataSource(Session activeSession) {
+        return new SessionDataSource(activeSession, activeFolderNames, activeFolderChildren);
     }
 }

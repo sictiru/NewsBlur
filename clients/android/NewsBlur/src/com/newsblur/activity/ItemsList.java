@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
+import android.widget.Toast;
 
 import com.newsblur.R;
 import com.newsblur.database.BlurDatabaseHelper;
@@ -28,10 +29,11 @@ import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.FeedUtils;
 import com.newsblur.util.ImageLoader;
+import com.newsblur.util.ReadingActionListener;
 import com.newsblur.util.PrefConstants.ThemeValue;
 import com.newsblur.util.PrefsUtils;
 import com.newsblur.util.ReadFilter;
-import com.newsblur.util.ReadingSession;
+import com.newsblur.util.SessionDataSource;
 import com.newsblur.util.SpacingStyle;
 import com.newsblur.util.StateFilter;
 import com.newsblur.util.StoryContentPreviewStyle;
@@ -46,7 +48,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public abstract class ItemsList extends NbActivity {
+public abstract class ItemsList extends NbActivity implements ReadingActionListener {
 
     @Inject
     BlurDatabaseHelper dbHelper;
@@ -62,7 +64,7 @@ public abstract class ItemsList extends NbActivity {
     public static final String EXTRA_STORY_HASH = "story_hash";
     public static final String EXTRA_WIDGET_STORY = "widget_story";
     public static final String EXTRA_VISIBLE_SEARCH = "visibleSearch";
-    public static final String EXTRA_READING_SESSION = "reading_session";
+    public static final String EXTRA_SESSION_DATA = "session_data";
     private static final String BUNDLE_ACTIVE_SEARCH_QUERY = "activeSearchQuery";
     private ActivityItemslistBinding binding;
 
@@ -71,7 +73,7 @@ public abstract class ItemsList extends NbActivity {
 
     protected FeedSet fs;
     @Nullable
-    protected ReadingSession readingSession;
+    protected SessionDataSource sessionDataSource;
 	
 	@Override
     protected void onCreate(Bundle bundle) {
@@ -82,8 +84,8 @@ public abstract class ItemsList extends NbActivity {
 		fs = (FeedSet) getIntent().getSerializableExtra(EXTRA_FEED_SET);
 		intelState = PrefsUtils.getStateFilter(this);
 
-        if (getIntent().hasExtra(EXTRA_READING_SESSION)) {
-            readingSession = (ReadingSession) getIntent().getSerializableExtra(EXTRA_READING_SESSION);
+        if (getIntent().hasExtra(EXTRA_SESSION_DATA)) {
+            sessionDataSource = (SessionDataSource) getIntent().getSerializableExtra(EXTRA_SESSION_DATA);
         }
 
         // this is not strictly necessary, since our first refresh with the fs will swap in
@@ -339,7 +341,7 @@ public abstract class ItemsList extends NbActivity {
 			finish();
 			return true;
 		} else if (item.getItemId() == R.id.menu_mark_all_as_read) {
-            feedUtils.markRead(this, fs, readingSession, null, null, R.array.mark_all_read_options, true);
+            feedUtils.markRead(this, fs, null, null, R.array.mark_all_read_options, this);
 			return true;
 		} else if (item.getItemId() == R.id.menu_story_order_newest) {
 		    updateStoryOrder(StoryOrder.NEWEST);
@@ -463,6 +465,11 @@ public abstract class ItemsList extends NbActivity {
 			    itemSetFragment.hasUpdated();
             }
         }
+    }
+
+    @Override
+    public void onReadingActionCompleted() {
+        Toast.makeText(this, "on marked all read callback", Toast.LENGTH_SHORT).show();
     }
 
     private void updateStatusIndicators() {

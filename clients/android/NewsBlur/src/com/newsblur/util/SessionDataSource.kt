@@ -3,11 +3,14 @@ package com.newsblur.util
 import com.newsblur.domain.Feed
 import java.io.Serializable
 
+/**
+ * @return Set of folder keys that don't support
+ * mark all read action
+ */
 private val invalidMarkAllReadFolderKeys by lazy {
     setOf(
             AppConstants.GLOBAL_SHARED_STORIES_GROUP_KEY,
             AppConstants.ALL_SHARED_STORIES_GROUP_KEY,
-            AppConstants.ALL_STORIES_GROUP_KEY,
             AppConstants.INFREQUENT_SITE_STORIES_GROUP_KEY,
             AppConstants.READ_STORIES_GROUP_KEY,
             AppConstants.SAVED_STORIES_GROUP_KEY,
@@ -15,16 +18,18 @@ private val invalidMarkAllReadFolderKeys by lazy {
     )
 }
 
-// document assumption
-private fun List<String>.zipFilteredFolderFeed(foldersChildren: List<List<Feed>>): Map<String, List<Feed>> {
+/**
+ * As of writing this function, the zipping of the two sources
+ * is valid as the "activeFolderNames" and "activeFolderChildren"
+ * can be mapped by their folder name.
+ * @return Map of folder names to their feed list.
+ */
+private fun List<String>.zipFolderFeed(foldersChildren: List<List<Feed>>): Map<String, List<Feed>> {
     val first = this.iterator()
     val second = foldersChildren.iterator()
     return buildMap {
         while (first.hasNext() && second.hasNext()) {
-            val folderName = first.next()
-//            if (!invalidMarkAllReadFolderKeys.contains(folderName)) {
-            this[folderName] = second.next()
-//            }
+            this[first.next()] = second.next()
         }
     }
 }
@@ -33,7 +38,12 @@ private fun Feed.toFeedSet() = FeedSet.singleFeed(this.feedId).apply {
     isMuted = !this@toFeedSet.active
 }
 
-class ReadingSession(
+/**
+ * Represents the user's current reading session data source
+ * as constructed and filtered by the home list adapter
+ * based on settings and preferences.
+ */
+class SessionDataSource private constructor(
         private val folders: List<String>,
         private val foldersChildrenMap: Map<String, List<Feed>>
 ) : Serializable {
@@ -45,39 +55,17 @@ class ReadingSession(
             folders: List<String>,
             foldersChildren: List<List<Feed>>,
     ) : this(
-            folders = folders,
-            foldersChildrenMap = folders.zipFilteredFolderFeed(foldersChildren)) {
+            folders = folders.filterNot { invalidMarkAllReadFolderKeys.contains(it) },
+            foldersChildrenMap = folders.zipFolderFeed(foldersChildren)
+                    .filterNot { invalidMarkAllReadFolderKeys.contains(it.key) },
+    ) {
         this.session = activeSession
     }
 
-//    constructor(
-//            activeSession: Session,
-//            folders: List<String>,
-//            foldersChildren: List<List<Feed>>,
-//    ) : this(folderFeedMap = folders.zipFilteredFolderFeed(foldersChildren)) {
-//        this.session = activeSession
-//    }
-//
-//    constructor(
-//            activeFeedSet: FeedSet,
-//            activeFolderName: String?,
-//            activeFeed: Feed?,
-//            folders: List<String>,
-//            foldersChildren: List<List<Feed>>,
-//    ) : this(folderFeedMap = folders.zipFilteredFolderFeed(foldersChildren)) {
-//        session = Session(
-//                feedSet = activeFeedSet,
-//                feed = activeFeed,
-//                folderName = activeFolderName,
-//        )
-//    }
-
-    // when folder
-    // get next folder -> get folder name. get value from map. map value into FeedSet
-
-    // when non folder
-    // get next feed, create feedSet and set the session
-
+    /**
+     * @return The next feed within a folder or null if the folder
+     * is showing the last feed.
+     */
     private fun getNextFolderFeed(feed: Feed, folderName: String): Feed? {
         val cleanFolderName =
                 // ROOT FOLDER maps to ALL_STORIES_GROUP_KEY
@@ -99,6 +87,11 @@ class ReadingSession(
         }
     }
 
+    /**
+     * @return The next non empty folder and its feeds based on the given folder name.
+     * If the next folder doesn't have feeds, it will call itself with the new folder name
+     * until it finds a non empty folder or it will get to the end of the folder list.
+     */
     private fun getNextNonEmptyFolder(folderName: String): Pair<String, List<Feed>>? = with(folders.indexOf(folderName)) {
         val nextIndex = if (this == folders.size - 1) {
             0 // first folder if EOL
@@ -120,44 +113,33 @@ class ReadingSession(
         else nextFolderName to feeds
     }
 
-    fun getNextSession(): Session? {
-        if (session.feedSet.isFolder) {
-            val folderName = session.feedSet.folderName
-            return getNextNonEmptyFolder(folderName)?.let { (nextFolderName, nextFolderFeeds) ->
-                val nextFeedSet = FeedSet.folder(nextFolderName, nextFolderFeeds.map { it.feedId }.toSet())
-                Session(feedSet = nextFeedSet)
-            }
-        } else {
-            if (session.feed == null || session.folderName == null) return null
-
-            val nextFeed = getNextFolderFeed(feed = session.feed!!, folderName = session.folderName!!)
-            return nextFeed?.let {
-                Session(feedSet = FeedSet.singleFeed(it.feedId), session.folderName, it)
-            }
+    fun getNextSession(): Session? = if (session.feedSet.isFolder) {
+        val folderName = session.feedSet.folderName
+        getNextNonEmptyFolder(folderName)?.let { (nextFolderName, nextFolderFeeds) ->
+            val nextFeedSet = FeedSet.folder(nextFolderName, nextFolderFeeds.map { it.feedId }.toSet())
+            Session(feedSet = nextFeedSet)
         }
-    }
-
-// feed item list
-// folder name
-// feed
-
-// item set fragment
-// feed set
-
-
-// item list
-// feed set
-
-// how to construct feed sets from feeds
-//    var feed: Feed? = activeFolderChildren.get(groupPosition).get(childPosition)
-//    var fs = FeedSet.singleFeed(feed!!.feedId)
-//    if (!feed.active)fs.setMuted(true)
-//    if (currentState == StateFilter.SAVED)fs.setFilterSaved(true)
-//    return fs
+    } else if (session.feed != null && session.folderName != null) {
+        val nextFeed = getNextFolderFeed(feed = session.feed!!, folderName = session.folderName!!)
+        nextFeed?.let {
+            Session(feedSet = it.toFeedSet(), session.folderName, it)
+        }
+    } else null
 }
 
+/**
+ * Represents the user's current reading session.
+ *
+ * When reading a folder, [folderName] and [feed] will be null.
+ *
+ * When reading a feed, [folderName] and [feed] will be non null.
+ */
 data class Session(
         val feedSet: FeedSet,
         val folderName: String? = null,
         val feed: Feed? = null,
 ) : Serializable
+
+interface ReadingActionListener : Serializable {
+    fun onReadingActionCompleted()
+}

@@ -393,7 +393,7 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
 	}
 
     private void markFeedsAsRead(FeedSet fs) {
-        feedUtils.markRead(((NbActivity) getActivity()), fs, null, null, R.array.mark_all_read_options, false);
+        feedUtils.markRead(((NbActivity) getActivity()), fs, null, null, R.array.mark_all_read_options);
         adapter.lastFeedViewedId = fs.getSingleFeed();
         adapter.lastFolderViewed = fs.getFolderName();
     }
@@ -467,7 +467,7 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
             String canonicalFolderName = adapter.getGroupFolderName(groupPosition);
             Session activeSession = new Session(fs, canonicalFolderName, null);
             i.putExtra(FolderItemsList.EXTRA_FOLDER_NAME, canonicalFolderName);
-            i.putExtra(ItemsList.EXTRA_READING_SESSION, adapter.buildReadingSession(activeSession));
+            i.putExtra(ItemsList.EXTRA_SESSION_DATA, adapter.buildSessionDataSource(activeSession));
             adapter.lastFeedViewedId = null;
             adapter.lastFolderViewed = canonicalFolderName;
         }
@@ -546,7 +546,7 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
                 feedUtils.currentFolderName = folderName;
             }
             Session activeSession = new Session(fs, folderName, feed);
-			FeedItemsList.startActivity(getActivity(), fs, feed, folderName, adapter.buildReadingSession(activeSession));
+			FeedItemsList.startActivity(getActivity(), fs, feed, folderName, adapter.buildSessionDataSource(activeSession));
             adapter.lastFeedViewedId = feed.feedId;
             adapter.lastFolderViewed = null;
 		}
