@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.text.TextUtils
-import android.widget.Toast
 import com.newsblur.R
 import com.newsblur.activity.NbActivity
 import com.newsblur.database.BlurDatabaseHelper
@@ -509,6 +508,24 @@ class FeedUtils(
         fun inferFeedId(storyHash: String?): String? {
             val parts = TextUtils.split(storyHash, ":")
             return if (parts.size != 2) null else parts[0]
+        }
+
+        /**
+         * Copy of TextUtils.equals because of Java for unit tests
+         */
+        @JvmStatic
+        fun textUtilsEquals(a: CharSequence?, b: CharSequence?): Boolean {
+            if (a === b) return true
+            return if (a != null && b != null && a.length == b.length) {
+                if (a is String && b is String) {
+                    a == b
+                } else {
+                    for (i in a.indices) {
+                        if (a[i] != b[i]) return false
+                    }
+                    true
+                }
+            } else false
         }
     }
 }
