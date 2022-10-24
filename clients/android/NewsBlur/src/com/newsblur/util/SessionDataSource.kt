@@ -117,12 +117,16 @@ class SessionDataSource private constructor(
         val folderName = session.feedSet.folderName
         getNextNonEmptyFolder(folderName)?.let { (nextFolderName, nextFolderFeeds) ->
             val nextFeedSet = FeedSet.folder(nextFolderName, nextFolderFeeds.map { it.feedId }.toSet())
-            Session(feedSet = nextFeedSet)
+            Session(feedSet = nextFeedSet).also { nextSession ->
+                session = nextSession
+            }
         }
     } else if (session.feed != null && session.folderName != null) {
         val nextFeed = getNextFolderFeed(feed = session.feed!!, folderName = session.folderName!!)
         nextFeed?.let {
-            Session(feedSet = it.toFeedSet(), session.folderName, it)
+            Session(feedSet = it.toFeedSet(), session.folderName, it).also { nextSession ->
+                session = nextSession
+            }
         }
     } else null
 }

@@ -15,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
-import android.widget.Toast;
 
 import com.newsblur.R;
 import com.newsblur.database.BlurDatabaseHelper;
@@ -31,6 +30,7 @@ import com.newsblur.util.FeedUtils;
 import com.newsblur.util.ImageLoader;
 import com.newsblur.util.ReadingActionListener;
 import com.newsblur.util.PrefsUtils;
+import com.newsblur.util.Session;
 import com.newsblur.util.SessionDataSource;
 import com.newsblur.util.StateFilter;
 import com.newsblur.util.UIUtils;
@@ -202,7 +202,23 @@ public abstract class ItemsList extends NbActivity implements ReadingActionListe
 
     @Override
     public void onReadingActionCompleted() {
-        Toast.makeText(this, "on marked all read callback", Toast.LENGTH_SHORT).show();
+        if (sessionDataSource != null) {
+            Session session = sessionDataSource.getNextSession();
+            if (session != null) {
+                // set the next session on the parent activity
+                fs = session.getFeedSet();
+                feedUtils.prepareReadingSession(fs, false);
+                triggerSync();
+
+                // set the next session on the child activity
+                onNextSession(session);
+
+                // update item set fragment
+                itemSetFragment.resetEmptyState();
+                itemSetFragment.hasUpdated();
+                itemSetFragment.scrollToTop();
+            } else finish();
+        } else finish();
     }
 
     private void updateStatusIndicators() {
@@ -283,4 +299,8 @@ public abstract class ItemsList extends NbActivity implements ReadingActionListe
     }
 
     abstract String getSaveSearchFeedId();
+
+    void onNextSession(Session session) {
+        // TODO update child activity with the latest session metadata
+    }
 }

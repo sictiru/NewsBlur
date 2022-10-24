@@ -254,7 +254,7 @@ class FeedUtils(
             optionalOverrideMessage = activity.resources.getString(R.string.search_mark_read_warning)
         }
         if (doImmediate) {
-//            doAction(ra, activity)
+            doAction(ra, activity)
             callback?.onReadingActionCompleted()
         } else {
             val title: String? = when {
