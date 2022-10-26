@@ -9,6 +9,8 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -21,19 +23,18 @@ import com.newsblur.database.BlurDatabaseHelper;
 import com.newsblur.databinding.ActivityItemslistBinding;
 import com.newsblur.delegate.ItemListContextMenuDelegate;
 import com.newsblur.delegate.ItemListContextMenuDelegateImpl;
-import com.newsblur.di.IconLoader;
 import com.newsblur.fragment.ItemSetFragment;
 import com.newsblur.service.NBSyncService;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.FeedUtils;
-import com.newsblur.util.ImageLoader;
 import com.newsblur.util.ReadingActionListener;
 import com.newsblur.util.PrefsUtils;
 import com.newsblur.util.Session;
 import com.newsblur.util.SessionDataSource;
 import com.newsblur.util.StateFilter;
 import com.newsblur.util.UIUtils;
+import com.newsblur.viewModel.ItemListViewModel;
 
 import javax.inject.Inject;
 
@@ -48,24 +49,21 @@ public abstract class ItemsList extends NbActivity implements ReadingActionListe
     @Inject
     FeedUtils feedUtils;
 
-    @Inject
-    @IconLoader
-    ImageLoader iconLoader;
-
     public static final String EXTRA_FEED_SET = "feed_set";
     public static final String EXTRA_STORY_HASH = "story_hash";
     public static final String EXTRA_WIDGET_STORY = "widget_story";
     public static final String EXTRA_VISIBLE_SEARCH = "visibleSearch";
     public static final String EXTRA_SESSION_DATA = "session_data";
     private static final String BUNDLE_ACTIVE_SEARCH_QUERY = "activeSearchQuery";
-    private ActivityItemslistBinding binding;
 
-    protected ItemListContextMenuDelegate contextMenuDelegate;
-	protected ItemSetFragment itemSetFragment;
-	protected StateFilter intelState;
+    protected ItemListViewModel viewModel;
     protected FeedSet fs;
+
+    private ItemSetFragment itemSetFragment;
+    private ActivityItemslistBinding binding;
+    private ItemListContextMenuDelegate contextMenuDelegate;
     @Nullable
-    protected SessionDataSource sessionDataSource;
+    private SessionDataSource sessionDataSource;
 	
 	@Override
     protected void onCreate(Bundle bundle) {
@@ -74,8 +72,8 @@ public abstract class ItemsList extends NbActivity implements ReadingActionListe
         overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
 
         contextMenuDelegate = new ItemListContextMenuDelegateImpl(this, feedUtils);
+        viewModel = new ViewModelProvider(this).get(ItemListViewModel.class);
 		fs = (FeedSet) getIntent().getSerializableExtra(EXTRA_FEED_SET);
-		intelState = PrefsUtils.getStateFilter(this);
 
         if (getIntent().hasExtra(EXTRA_SESSION_DATA)) {
             sessionDataSource = (SessionDataSource) getIntent().getSerializableExtra(EXTRA_SESSION_DATA);
@@ -89,6 +87,7 @@ public abstract class ItemsList extends NbActivity implements ReadingActionListe
             String hash = (String) getIntent().getSerializableExtra(EXTRA_STORY_HASH);
             UIUtils.startReadingActivity(fs, hash, this);
         } else if (PrefsUtils.isAutoOpenFirstUnread(this)) {
+            StateFilter intelState = PrefsUtils.getStateFilter(this);
             if (dbHelper.getUnreadCount(fs, intelState) > 0) {
                 UIUtils.startReadingActivity(fs, Reading.FIND_FIRST_UNREAD, this);
             }
@@ -211,7 +210,7 @@ public abstract class ItemsList extends NbActivity implements ReadingActionListe
                 triggerSync();
 
                 // set the next session on the child activity
-                onNextSession(session);
+                viewModel.updateSession(session);
 
                 // update item set fragment
                 itemSetFragment.resetEmptyState();
@@ -300,7 +299,4 @@ public abstract class ItemsList extends NbActivity implements ReadingActionListe
 
     abstract String getSaveSearchFeedId();
 
-    void onNextSession(Session session) {
-        // TODO update child activity with the latest session metadata
-    }
 }

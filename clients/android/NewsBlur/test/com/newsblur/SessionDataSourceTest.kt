@@ -114,8 +114,8 @@ class SessionDataSourceTest {
         val sessionDs = SessionDataSource(session, folders, folderChildren)
 
         sessionDs.getNextSession()?.let {
-            Assert.assertNull(it.folderName)
             Assert.assertNull(it.feed)
+            Assert.assertEquals("F3", it.folderName)
             Assert.assertEquals("F3", it.feedSet.folderName)
             Assert.assertEquals("30", it.feedSet.flatFeedIds.firstOrNull())
         } ?: Assert.fail("Next session is null for F2 feedSetFolder")
@@ -133,8 +133,8 @@ class SessionDataSourceTest {
         val sessionDs = SessionDataSource(session, folders, folderChildren)
 
         sessionDs.getNextSession()?.let {
-            Assert.assertNull(it.folderName)
             Assert.assertNull(it.feed)
+            Assert.assertEquals("F5", it.folderName)
             Assert.assertEquals("F5", it.feedSet.folderName)
             Assert.assertEquals("50", it.feedSet.flatFeedIds.firstOrNull())
         } ?: Assert.fail("Next session is null for F5 feedSetFolder")
@@ -151,8 +151,8 @@ class SessionDataSourceTest {
         val sessionDs = SessionDataSource(session, folders, folderChildren)
 
         sessionDs.getNextSession()?.let {
-            Assert.assertNull(it.folderName)
             Assert.assertNull(it.feed)
+            Assert.assertEquals("F2", it.folderName)
             Assert.assertEquals("F2", it.feedSet.folderName)
             Assert.assertEquals(setOf("20", "21", "22"), it.feedSet.flatFeedIds)
         } ?: Assert.fail("Next session is null for F5 feedSetFolder")

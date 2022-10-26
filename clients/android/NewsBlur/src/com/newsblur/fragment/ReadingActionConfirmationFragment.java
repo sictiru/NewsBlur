@@ -58,7 +58,7 @@ public class ReadingActionConfirmationFragment extends DialogFragment {
         builder.setItems(choicesId, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 if (which == 0) {
-//                    feedUtils.doAction(ra, getActivity());
+                    feedUtils.doAction(ra, requireContext());
                     if (callback != null) {
                         callback.onReadingActionCompleted();
                     }

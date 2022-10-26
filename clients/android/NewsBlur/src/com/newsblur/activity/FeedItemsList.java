@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import android.view.Menu;
@@ -14,17 +15,29 @@ import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.play.core.tasks.Task;
 import com.newsblur.R;
+import com.newsblur.di.IconLoader;
 import com.newsblur.domain.Feed;
 import com.newsblur.fragment.DeleteFeedFragment;
 import com.newsblur.fragment.FeedIntelTrainerFragment;
 import com.newsblur.fragment.RenameDialogFragment;
 import com.newsblur.util.FeedExt;
 import com.newsblur.util.FeedSet;
+import com.newsblur.util.ImageLoader;
 import com.newsblur.util.PrefsUtils;
+import com.newsblur.util.Session;
 import com.newsblur.util.SessionDataSource;
 import com.newsblur.util.UIUtils;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class FeedItemsList extends ItemsList {
+
+    @Inject
+    @IconLoader
+    ImageLoader iconLoader;
 
     public static final String EXTRA_FEED = "feed";
     public static final String EXTRA_FOLDER_NAME = "folderName";
@@ -46,12 +59,9 @@ public class FeedItemsList extends ItemsList {
 
 	@Override
 	protected void onCreate(Bundle bundle) {
-		feed = (Feed) getIntent().getSerializableExtra(EXTRA_FEED);
-        folderName = getIntent().getStringExtra(EXTRA_FOLDER_NAME);
-
 		super.onCreate(bundle);
-
-        UIUtils.setupToolbar(this, feed.faviconUrl, feed.title, iconLoader, false);
+        setupFeedItems(getIntent());
+        viewModel.getNextSession().observe(this, this::setupFeedItems);
         checkInAppReview();
     }
 
@@ -141,6 +151,28 @@ public class FeedItemsList extends ItemsList {
     @Override
     String getSaveSearchFeedId() {
         return "feed:" + feed.feedId;
+    }
+
+    private void setupFeedItems(Session session) {
+        Feed feed = session.getFeed();
+        String folderName = session.getFolderName();
+        if (feed != null && folderName != null) {
+            setupFeedItems(feed, folderName);
+        } else {
+            finish();
+        }
+    }
+
+    private void setupFeedItems(Intent intent) {
+        Feed feed = (Feed) intent.getSerializableExtra(EXTRA_FEED);
+        String folderName = intent.getStringExtra(EXTRA_FOLDER_NAME);
+        setupFeedItems(feed, folderName);
+    }
+
+    private void setupFeedItems(@NonNull Feed feed, @NonNull String folderName) {
+        this.feed = feed;
+        this.folderName = folderName;
+        UIUtils.setupToolbar(this, feed.faviconUrl, feed.title, iconLoader, false);
     }
 
     private void checkInAppReview() {
