@@ -439,6 +439,11 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
 
 	@Override
     public boolean onGroupClick(ExpandableListView list, View group, int groupPosition, long id) {
+        if (adapter.isRowSavedSearches(groupPosition)) {
+            // group not clickable
+            return true;
+        }
+
         FeedSet fs = adapter.getGroup(groupPosition);
         Intent i;
         if (adapter.isRowAllStories(groupPosition)) {
@@ -459,12 +464,8 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
             i = new Intent(getActivity(), ReadStoriesItemsList.class);
         } else if (adapter.isRowSavedStories(groupPosition)) {
             i = new Intent(getActivity(), SavedStoriesItemsList.class);
-        } else if (adapter.isRowSavedSearches(groupPosition)) {
-            // group not clickable
-            return true;
         } else {
             i = new Intent(getActivity(), FolderItemsList.class);
-            // TODO is the cano folder name what we need?
             String canonicalFolderName = adapter.getGroupFolderName(groupPosition);
             SessionDataSource sessionDataSource = getSessionData(fs, canonicalFolderName, null);
             i.putExtra(FolderItemsList.EXTRA_FOLDER_NAME, canonicalFolderName);
