@@ -74,10 +74,7 @@ public abstract class ItemsList extends NbActivity implements ReadingActionListe
         contextMenuDelegate = new ItemListContextMenuDelegateImpl(this, feedUtils);
         viewModel = new ViewModelProvider(this).get(ItemListViewModel.class);
 		fs = (FeedSet) getIntent().getSerializableExtra(EXTRA_FEED_SET);
-
-        if (getIntent().hasExtra(EXTRA_SESSION_DATA)) {
-            sessionDataSource = (SessionDataSource) getIntent().getSerializableExtra(EXTRA_SESSION_DATA);
-        }
+        sessionDataSource = (SessionDataSource) getIntent().getSerializableExtra(EXTRA_SESSION_DATA);
 
         // this is not strictly necessary, since our first refresh with the fs will swap in
         // the correct session, but that can be delayed by sync backup, so we try here to

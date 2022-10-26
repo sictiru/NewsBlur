@@ -54,6 +54,7 @@ import com.newsblur.domain.SocialFeed;
 import com.newsblur.util.Session;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedExt;
+import com.newsblur.util.SessionDataSource;
 import com.newsblur.util.SpacingStyle;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.FeedUtils;
@@ -465,9 +466,9 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
             i = new Intent(getActivity(), FolderItemsList.class);
             // TODO is the cano folder name what we need?
             String canonicalFolderName = adapter.getGroupFolderName(groupPosition);
-            Session activeSession = new Session(fs, canonicalFolderName, null);
+            SessionDataSource sessionDataSource = getSessionData(fs, canonicalFolderName, null);
             i.putExtra(FolderItemsList.EXTRA_FOLDER_NAME, canonicalFolderName);
-            i.putExtra(ItemsList.EXTRA_SESSION_DATA, adapter.buildSessionDataSource(activeSession));
+            i.putExtra(ItemsList.EXTRA_SESSION_DATA, sessionDataSource);
             adapter.lastFeedViewedId = null;
             adapter.lastFolderViewed = canonicalFolderName;
         }
@@ -545,8 +546,8 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
 
                 feedUtils.currentFolderName = folderName;
             }
-            Session activeSession = new Session(fs, folderName, feed);
-			FeedItemsList.startActivity(getActivity(), fs, feed, folderName, adapter.buildSessionDataSource(activeSession));
+            SessionDataSource sessionDataSource = getSessionData(fs, folderName, feed);
+			FeedItemsList.startActivity(getActivity(), fs, feed, folderName, sessionDataSource);
             adapter.lastFeedViewedId = feed.feedId;
             adapter.lastFolderViewed = null;
 		}
@@ -623,5 +624,14 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
             adapter.setSpacingStyle(spacingStyle);
             adapter.notifyDataSetChanged();
         }
+    }
+
+    @Nullable
+    private SessionDataSource getSessionData(FeedSet fs, String folderName, @Nullable Feed feed) {
+        if (PrefsUtils.loadNextOnMarkRead(requireContext())) {
+            Session activeSession = new Session(fs, folderName, feed);
+            return adapter.buildSessionDataSource(activeSession);
+        }
+        return null;
     }
 }
