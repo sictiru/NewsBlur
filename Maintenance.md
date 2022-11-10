@@ -125,4 +125,24 @@ You got the downtime message either through email or SMS. This is the order of o
     crack are automatically fixed after 24 hours, but if many feeds fall through due to a bad 
     deploy or electrical failure, you'll want to accelerate that check by just draining the 
     tasked feeds pool, adding those feeds back into the queue. This command is idempotent.
-      
+
+## Python 3
+
+### Switching to a new redis server
+
+When the new redis server is connected to the primary redis server:
+
+   # db-redis-story2 = moving to new server
+   # db-redis-story1 = old server about to be shutdown
+   # Edit digitalocean.tf to change db-redis-story count to 2
+   make plan
+   make apply
+   make firewall
+   # Wait for redis to sync, takes 5-10 minutes
+   # Edit redis/consul_service.json to switch primary to db-redis-story2
+   make celery_stop
+   make maintenance_on
+   apd -l db-redis-story2 -t replicaofnoone
+   aps -l db-redis-story1,db-redis-story2 -t consul
+   make maintenance_off
+   make task

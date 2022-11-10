@@ -16,6 +16,9 @@ groups:
   node: inventory_hostname.startswith('node')
   node_socket: inventory_hostname.startswith('node-socket')
   node_images: inventory_hostname.startswith('node-images')
+  node_text: inventory_hostname.startswith('node-text')
+  node_page: inventory_hostname.startswith('node-page')
+  node_favicons: inventory_hostname.startswith('node-favicons')
 
   # debugs: inventory_hostname.startswith('debug')
 
@@ -29,6 +32,7 @@ groups:
   search: inventory_hostname.startswith('db-elasticsearch')
   elasticsearch: inventory_hostname.startswith('db-elasticsearch')
   redis: inventory_hostname.startswith('db-redis')
+  redis_story: inventory_hostname.startswith('db-redis-story')
   postgres: inventory_hostname.startswith('db-postgres')
   mongo: inventory_hostname.startswith('db-mongo') and not inventory_hostname.startswith('db-mongo-analytics')
   mongo_analytics: inventory_hostname.startswith('db-mongo-analytics')
