@@ -19,6 +19,10 @@ import org.junit.runner.RunWith
  * Run this benchmark from Studio to see startup measurements, and captured system traces
  * for investigating your app's performance.
  */
+
+/**
+ * Runs in its own process
+ */
 @OptIn(ExperimentalMetricApi::class)
 @RunWith(AndroidJUnit4::class)
 class StartupBenchmark {

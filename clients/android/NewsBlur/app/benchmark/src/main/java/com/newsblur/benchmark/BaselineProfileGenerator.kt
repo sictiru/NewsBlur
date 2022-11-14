@@ -7,6 +7,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Runs in its own process
+ */
 @OptIn(ExperimentalBaselineProfilesApi::class)
 @RunWith(AndroidJUnit4::class)
 class BaselineProfileGenerator {
@@ -30,16 +33,31 @@ class BaselineProfileGenerator {
             startActivityAndWait()
 
             if (needsLogin) {
-                inputIntoLabel("username", "android_speed")
+                inputIntoLabel("username", "username")
                 inputIntoLabel("password", "newsblur")
                 clickOnText("LOGIN")
                 needsLogin = false
-                waitForTextShown("android_speed")
+                waitForTextShown("username")
             }
 
-            waitLongForTextShown("Android Authority")
+            waitLongForTextShown("All Stories")
+            // switch to All view
+            clickOnText("All")
+            // wait for stories to load
+            waitLongForTextShown("Android Developers Blog")
+            // click on folder
             clickOnText("All Stories")
-            waitForTextShown("All Stories")
+            // wait folder to load stories
+            waitForTextShown("Electrek")
+
+            device.pressBack()
+
+            // wait for folder/feeds to load
+            waitForTextShown("The NewsBlur Blog")
+            // click on feed
+            clickOnText("The NewsBlur Blog")
+            // wait for some feed story to load
+            waitForTextShown("Magazine view offers a new perspective")
         }
     }
 }
