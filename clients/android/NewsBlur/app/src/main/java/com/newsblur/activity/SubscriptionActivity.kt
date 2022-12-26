@@ -21,6 +21,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 import javax.inject.Inject
 
+/**
+ * - no subscription - all both load and both can be clicked DONE
+ * - no subscription - go premium and verify that it applied, screen is showing state
+ * - no subscription - go archive and verify that it applied, screen is showing state
+ * - premium subscription - can upgrade to archive. upgrade and see difference and state
+ * - archive subscription - can downgrade to premium?. downgrade and see difference and state
+ * - valid subscription but no NB is subscribed. Check is it will send receipt
+ */
 @AndroidEntryPoint
 class SubscriptionActivity : NbActivity() {
 
