@@ -224,8 +224,7 @@ class SubscriptionManagerImpl(
     }
 
     override suspend fun hasActiveSubscription(): Boolean =
-            PrefsUtils.getIsPremium(context) ||
-                    PrefsUtils.getIsArchive(context) ||
+            PrefsUtils.hasSubscription(context) ||
                     getActiveSubscriptionAsync().await() != null
 
     override fun saveReceipt(purchase: Purchase) {
@@ -311,7 +310,7 @@ class SubscriptionManagerImpl(
      * Generate subscription renewal message.
      */
     private fun getRenewalMessage(purchase: Purchase?): String? {
-        val expirationTimeMs = PrefsUtils.getPremiumExpire(context)
+        val expirationTimeMs = PrefsUtils.getSubscriptionExpire(context)
         return when {
             // lifetime subscription
             expirationTimeMs == 0L -> {

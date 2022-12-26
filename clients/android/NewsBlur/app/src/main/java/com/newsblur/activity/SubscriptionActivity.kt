@@ -104,9 +104,10 @@ class SubscriptionActivity : NbActivity() {
         productDetails.find { it.productId == AppConstants.PREMIUM_SUB_ID }?.let {
             showPremiumSubscription(it)
         } ?: hidePremiumSubscription()
-        productDetails.find { it.productId == AppConstants.PREMIUM_ARCHIVE_SUB_ID }?.let {
+        // TODO enabled once upgrades and downgrades are supported
+        /*productDetails.find { it.productId == AppConstants.PREMIUM_ARCHIVE_SUB_ID }?.let {
             showArchiveSubscription(it)
-        } ?: hideArchiveSubscription()
+        } ?: */hideArchiveSubscription()
 
         if (!bindingPremium.root.isVisible && !bindingArchive.root.isVisible) {
             binding.textNoSubscriptions.setViewVisible()

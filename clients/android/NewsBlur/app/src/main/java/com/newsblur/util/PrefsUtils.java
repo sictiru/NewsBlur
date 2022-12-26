@@ -1011,7 +1011,7 @@ public class PrefsUtils {
         Editor editor = prefs.edit();
         editor.putBoolean(PrefConstants.IS_ARCHIVE, isArchive);
         if (archiveExpire != null) {
-            editor.putLong(PrefConstants.PREMIUM_EXPIRE, archiveExpire);
+            editor.putLong(PrefConstants.SUBSCRIPTION_EXPIRE, archiveExpire);
         }
         editor.commit();
     }
@@ -1026,7 +1026,7 @@ public class PrefsUtils {
         Editor editor = prefs.edit();
         editor.putBoolean(PrefConstants.IS_PREMIUM, isPremium);
         if (premiumExpire != null) {
-            editor.putLong(PrefConstants.PREMIUM_EXPIRE, premiumExpire);
+            editor.putLong(PrefConstants.SUBSCRIPTION_EXPIRE, premiumExpire);
         }
         editor.commit();
     }
@@ -1036,9 +1036,13 @@ public class PrefsUtils {
         return preferences.getBoolean(PrefConstants.IS_PREMIUM, false);
     }
 
-    public static long getPremiumExpire(Context context) {
+    public static long getSubscriptionExpire(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(PrefConstants.PREFERENCES, 0);
-        return preferences.getLong(PrefConstants.PREMIUM_EXPIRE, -1);
+        return preferences.getLong(PrefConstants.SUBSCRIPTION_EXPIRE, -1);
+    }
+
+    public static boolean hasSubscription(Context context) {
+        return getIsPremium(context) || getIsArchive(context);
     }
 
     public static boolean hasInAppReviewed(Context context) {

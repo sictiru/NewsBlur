@@ -569,14 +569,14 @@ public class UIUtils {
         }
     }
 
-    public static boolean needsPremiumAccess(Context context, FeedSet feedSet) {
-        boolean isPremium = PrefsUtils.getIsPremium(context);
-        boolean requiresPremium = feedSet.isFolder() || feedSet.isInfrequent() ||
+    public static boolean needsSubscriptionAccess(Context context, FeedSet feedSet) {
+        boolean hasSubscription = PrefsUtils.hasSubscription(context);
+        boolean requiresSubscription = feedSet.isFolder() || feedSet.isInfrequent() ||
                 feedSet.isAllNormal() || feedSet.isGlobalShared() || feedSet.isSingleSavedTag();
-        return !isPremium && requiresPremium;
+        return !hasSubscription && requiresSubscription;
     }
 
-    public static void startPremiumActivity(Context context) {
+    public static void startSubscriptionActivity(Context context) {
         Intent intent = new Intent(context, SubscriptionActivity.class);
         context.startActivity(intent);
     }
