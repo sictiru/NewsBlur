@@ -52,18 +52,18 @@ class FeedUtils(
     }
 
     fun setStorySaved(storyHash: String?, saved: Boolean, context: Context) {
-        val userTags: MutableList<String?> = ArrayList()
-        if (currentFolderName != null) {
-            userTags.add(currentFolderName)
+        val userTags: MutableList<String> = ArrayList()
+        currentFolderName?.let {
+            userTags.add(it)
         }
         setStorySaved(storyHash, saved, context, userTags)
     }
 
-    fun setStorySaved(story: Story, saved: Boolean, context: Context, userTags: List<String?>?) {
+    fun setStorySaved(story: Story, saved: Boolean, context: Context, userTags: List<String>?) {
         setStorySaved(story.storyHash, saved, context, userTags)
     }
 
-    private fun setStorySaved(storyHash: String?, saved: Boolean, context: Context, userTags: List<String?>?) {
+    private fun setStorySaved(storyHash: String?, saved: Boolean, context: Context, userTags: List<String>?) {
         NBScope.executeAsyncTask(
                 doInBackground = {
                     val ra = if (saved) ReadingAction.saveStory(storyHash, userTags) else ReadingAction.unsaveStory(storyHash)

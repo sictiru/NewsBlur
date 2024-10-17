@@ -71,7 +71,7 @@ public class BlurDatabaseHelper {
     }
 
     public void close() {
-        // when asked to close, do so via an AsyncTask. This is so that (since becoming serial in android 4.0) 
+        // when asked to close, do so via an AsyncTask. This is so that (since becoming serial in android 4.0)
         // the closure will happen after other async tasks are done using the conn
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(() -> {
@@ -152,7 +152,7 @@ public class BlurDatabaseHelper {
         Calendar cutoffDate = Calendar.getInstance();
         cutoffDate.add(Calendar.MONTH, -1);
         synchronized (RW_MUTEX) {
-            int count = dbRW.delete(DatabaseConstants.STORY_TABLE, 
+            int count = dbRW.delete(DatabaseConstants.STORY_TABLE,
                         DatabaseConstants.STORY_TIMESTAMP + " < ?" +
                         " AND " + DatabaseConstants.STORY_TEXT_STORY_HASH + " NOT IN " +
                         "( SELECT " + DatabaseConstants.READING_SESSION_STORY_HASH + " FROM " + DatabaseConstants.READING_SESSION_TABLE + ")",
@@ -167,7 +167,7 @@ public class BlurDatabaseHelper {
      */
     public void cleanupReadStories() {
         synchronized (RW_MUTEX) {
-            int count = dbRW.delete(DatabaseConstants.STORY_TABLE, 
+            int count = dbRW.delete(DatabaseConstants.STORY_TABLE,
                         DatabaseConstants.STORY_READ + " = 1" +
                         " AND " + DatabaseConstants.STORY_TEXT_STORY_HASH + " NOT IN " +
                         "( SELECT " + DatabaseConstants.READING_SESSION_STORY_HASH + " FROM " + DatabaseConstants.READING_SESSION_TABLE + ")",
@@ -286,7 +286,7 @@ public class BlurDatabaseHelper {
     // spend the up-front cost of hashing for better lookup speed rather than iteration!
     @NonNull
     public Set<String> getUnreadStoryHashesAsSet() {
-        String q = "SELECT " + DatabaseConstants.STORY_HASH + 
+        String q = "SELECT " + DatabaseConstants.STORY_HASH +
                    " FROM " + DatabaseConstants.STORY_TABLE +
                    " WHERE " + DatabaseConstants.STORY_READ + " = 0" ;
         Cursor c = dbRO.rawQuery(q, null);
@@ -344,7 +344,7 @@ public class BlurDatabaseHelper {
             // result in crashes that poison the DB beyond repair
             dbRW.beginTransaction();
             try {
-            
+
                 // to insert classifiers, we need to determine the feed ID of the stories in this
                 // response, so sniff one out.
                 String impliedFeedId = null;
@@ -494,10 +494,10 @@ public class BlurDatabaseHelper {
             com.newsblur.util.Log.e(this, "updateStory called on response with missing single story");
             return;
         }
-        Cursor c = dbRO.query(DatabaseConstants.STORY_TABLE, 
-                              null, 
-                              DatabaseConstants.STORY_HASH + " = ?", 
-                              new String[]{apiResponse.story.storyHash}, 
+        Cursor c = dbRO.query(DatabaseConstants.STORY_TABLE,
+                              null,
+                              DatabaseConstants.STORY_HASH + " = ?",
+                              new String[]{apiResponse.story.storyHash},
                               null, null, null);
         if (c.getCount() < 1) {
             com.newsblur.util.Log.w(this, "updateStory can't find old copy; new story may be missing fields.");
@@ -652,10 +652,10 @@ public class BlurDatabaseHelper {
     public boolean isFeedSetFetchPending(@NonNull FeedSet fs) {
         if (fs.getSingleFeed() != null) {
             String feedId = fs.getSingleFeed();
-            Cursor c = dbRO.query(DatabaseConstants.FEED_TABLE, 
-                                  new String[]{DatabaseConstants.FEED_FETCH_PENDING}, 
-                                  DatabaseConstants.FEED_ID + " = ? AND " + DatabaseConstants.FEED_FETCH_PENDING + " = ?", 
-                                  new String[]{feedId, "1"}, 
+            Cursor c = dbRO.query(DatabaseConstants.FEED_TABLE,
+                                  new String[]{DatabaseConstants.FEED_FETCH_PENDING},
+                                  DatabaseConstants.FEED_ID + " = ? AND " + DatabaseConstants.FEED_FETCH_PENDING + " = ?",
+                                  new String[]{feedId, "1"},
                                   null, null, null);
             try {
                 if (c.getCount() > 0) return true;
@@ -701,10 +701,10 @@ public class BlurDatabaseHelper {
             dbRW.beginTransaction();
             try {
                 // get a fresh copy of the story from the DB so we know if it changed
-                Cursor c = dbRW.query(DatabaseConstants.STORY_TABLE, 
-                                      new String[]{DatabaseConstants.STORY_READ}, 
-                                      DatabaseConstants.STORY_HASH + " = ?", 
-                                      new String[]{story.storyHash}, 
+                Cursor c = dbRW.query(DatabaseConstants.STORY_TABLE,
+                                      new String[]{DatabaseConstants.STORY_READ},
+                                      DatabaseConstants.STORY_HASH + " = ?",
+                                      new String[]{story.storyHash},
                                       null, null, null);
                 if (c.getCount() < 1) {
                     Log.w(this.getClass().getName(), "story removed before finishing mark-read");
@@ -797,7 +797,7 @@ public class BlurDatabaseHelper {
             // even though we can count up and total the unreads in social feeds, the API doesn't vend
             // unread status for stories viewed when reading All Shared Stories, so force this to 0.
             return 0;
-        } else if (fs.getMultipleFeeds() != null) { 
+        } else if (fs.getMultipleFeeds() != null) {
             StringBuilder selection = new StringBuilder(DatabaseConstants.FEED_ID + " IN ( ");
             selection.append(TextUtils.join(",", fs.getMultipleFeeds())).append(")");
             return getFeedsUnreadCount(stateFilter, selection.toString(), null);
@@ -861,7 +861,7 @@ public class BlurDatabaseHelper {
         if (fs.isAllNormal()) {
             feedIds.addAll(getAllFeeds());
             socialFeedIds.addAll(getAllSocialFeeds());
-        } else if (fs.getMultipleFeeds() != null) { 
+        } else if (fs.getMultipleFeeds() != null) {
             feedIds.addAll(fs.getMultipleFeeds());
         } else if (fs.getSingleFeed() != null) {
             feedIds.add(fs.getSingleFeed());
@@ -951,10 +951,10 @@ public class BlurDatabaseHelper {
             dbRW.beginTransaction();
             try {
                 // get a fresh copy of the story from the DB so we know if it changed
-                Cursor c = dbRW.query(DatabaseConstants.STORY_TABLE, 
-                                      new String[]{DatabaseConstants.STORY_STARRED}, 
-                                      DatabaseConstants.STORY_HASH + " = ?", 
-                                      new String[]{hash}, 
+                Cursor c = dbRW.query(DatabaseConstants.STORY_TABLE,
+                                      new String[]{DatabaseConstants.STORY_STARRED},
+                                      DatabaseConstants.STORY_HASH + " = ?",
+                                      new String[]{hash},
                                       null, null, null);
                 if (c.getCount() < 1) {
                     Log.w(this.getClass().getName(), "story removed before finishing mark-starred");
@@ -994,10 +994,10 @@ public class BlurDatabaseHelper {
 
     public void setStoryShared(@Nullable String hash, @Nullable String currentUserId, boolean shared) {
         // get a fresh copy of the story from the DB so we can append to the shared ID set
-        Cursor c = dbRO.query(DatabaseConstants.STORY_TABLE, 
-                              new String[]{DatabaseConstants.STORY_SHARED_USER_IDS}, 
-                              DatabaseConstants.STORY_HASH + " = ?", 
-                              new String[]{hash}, 
+        Cursor c = dbRO.query(DatabaseConstants.STORY_TABLE,
+                              new String[]{DatabaseConstants.STORY_SHARED_USER_IDS},
+                              DatabaseConstants.STORY_HASH + " = ?",
+                              new String[]{hash},
                               null, null, null);
         if ((c == null)||(c.getCount() < 1)) {
             Log.w(this.getClass().getName(), "story removed before finishing mark-shared");
@@ -1168,7 +1168,7 @@ public class BlurDatabaseHelper {
         // those filters are use to push live or cached story hashes into the reading session table, and
         // those hashes are used to pull story data from the story table
         StringBuilder q = new StringBuilder(DatabaseConstants.SESSION_STORY_QUERY_BASE);
-        
+
         if (fs.isAllRead()) {
             q.append(" ORDER BY ").append(DatabaseConstants.READ_STORY_ORDER);
         } else if (fs.isGlobalShared()) {
@@ -1187,7 +1187,7 @@ public class BlurDatabaseHelper {
     }
 
     /**
-     * Populates the reading session table with hashes of already-fetched stories that meet the 
+     * Populates the reading session table with hashes of already-fetched stories that meet the
      * criteria for the given FeedSet and filters; these hashes will be supplemented by hashes
      * fetched via the API and used to actually select story data when rendering story lists.
      */
@@ -1279,7 +1279,7 @@ public class BlurDatabaseHelper {
             tagArg.append(fs.getSingleSavedTag()).append("%");
             selArgs.add(tagArg.toString());
             DatabaseConstants.appendStorySelection(sel, selArgs, ReadFilter.ALL, StateFilter.ALL, fs.getSearchQuery());
-            
+
         } else if (fs.isGlobalShared()) {
 
             sel.append(" FROM " + DatabaseConstants.SOCIALFEED_STORY_MAP_TABLE);
@@ -1340,7 +1340,7 @@ public class BlurDatabaseHelper {
     @NonNull
     public List<Comment> getComments(@NonNull String storyId) {
         String[] selArgs = new String[] {storyId};
-        String selection = DatabaseConstants.COMMENT_STORYID + " = ?"; 
+        String selection = DatabaseConstants.COMMENT_STORYID + " = ?";
         Cursor c = dbRO.query(DatabaseConstants.COMMENT_TABLE, null, selection, selArgs, null, null, null);
         List<Comment> comments = new ArrayList<Comment>(c.getCount());
         while (c.moveToNext()) {
@@ -1401,15 +1401,15 @@ public class BlurDatabaseHelper {
 
     public void clearSelfComments(@Nullable String storyId, @Nullable String userId) {
         synchronized (RW_MUTEX) {dbRW.delete(DatabaseConstants.COMMENT_TABLE,
-                                             DatabaseConstants.COMMENT_STORYID + " = ? AND " + DatabaseConstants.COMMENT_USERID + " = ?", 
+                                             DatabaseConstants.COMMENT_STORYID + " = ? AND " + DatabaseConstants.COMMENT_USERID + " = ?",
                                              new String[]{storyId, userId});}
     }
 
     public void setCommentLiked(@Nullable String storyId, @Nullable String commentUserId, @Nullable String currentUserId, boolean liked) {
         // get a fresh copy of the story from the DB so we can append to the shared ID set
-        Cursor c = dbRO.query(DatabaseConstants.COMMENT_TABLE, 
-                              null, 
-                              DatabaseConstants.COMMENT_STORYID + " = ? AND " + DatabaseConstants.COMMENT_USERID + " = ?", 
+        Cursor c = dbRO.query(DatabaseConstants.COMMENT_TABLE,
+                              null,
+                              DatabaseConstants.COMMENT_STORYID + " = ? AND " + DatabaseConstants.COMMENT_USERID + " = ?",
                               new String[]{storyId, commentUserId},
                               null, null, null);
         if ((c == null)||(c.getCount() < 1)) {
@@ -1459,10 +1459,10 @@ public class BlurDatabaseHelper {
 
     public void insertReplyPlaceholder(@Nullable String storyId, @Nullable String userId, @Nullable String commentUserId, @Nullable String replyText) {
         // get a fresh copy of the comment so we can discover the ID
-        Cursor c = dbRO.query(DatabaseConstants.COMMENT_TABLE, 
-                              null, 
-                              DatabaseConstants.COMMENT_STORYID + " = ? AND " + DatabaseConstants.COMMENT_USERID + " = ?", 
-                              new String[]{storyId, commentUserId}, 
+        Cursor c = dbRO.query(DatabaseConstants.COMMENT_TABLE,
+                              null,
+                              DatabaseConstants.COMMENT_STORYID + " = ? AND " + DatabaseConstants.COMMENT_USERID + " = ?",
+                              new String[]{storyId, commentUserId},
                               null, null, null);
         if ((c == null)||(c.getCount() < 1)) {
             com.newsblur.util.Log.w(this, "comment removed before reply could be processed");
@@ -1502,7 +1502,7 @@ public class BlurDatabaseHelper {
         Calendar cutoffDate = Calendar.getInstance();
         cutoffDate.add(Calendar.MONTH, -1);
         synchronized (RW_MUTEX) {
-            int count = dbRW.delete(DatabaseConstants.NOTIFY_DISMISS_TABLE, 
+            int count = dbRW.delete(DatabaseConstants.NOTIFY_DISMISS_TABLE,
                         DatabaseConstants.NOTIFY_DISMISS_TIME + " < ?",
                         new String[]{Long.toString(cutoffDate.getTime().getTime())});
             com.newsblur.util.Log.d(this.getClass().getName(), "cleaned up dismissals: " + count);
@@ -1526,12 +1526,12 @@ public class BlurDatabaseHelper {
 
     @NonNull
     public List<String> getTagsForFeed(@Nullable String feedId) {
-        Cursor c = dbRO.query(DatabaseConstants.FEED_TAGS_TABLE, 
-                              new String[]{DatabaseConstants.FEED_TAGS_TAG}, 
-                              DatabaseConstants.FEED_TAGS_FEEDID + " = ?", 
-                              new String[]{feedId}, 
-                              null, 
-                              null, 
+        Cursor c = dbRO.query(DatabaseConstants.FEED_TAGS_TABLE,
+                              new String[]{DatabaseConstants.FEED_TAGS_TAG},
+                              DatabaseConstants.FEED_TAGS_FEEDID + " = ?",
+                              new String[]{feedId},
+                              null,
+                              null,
                               DatabaseConstants.FEED_TAGS_TAG + " ASC"
                              );
         List<String> result = new ArrayList<String>(c.getCount());
@@ -1541,7 +1541,7 @@ public class BlurDatabaseHelper {
         closeQuietly(c);
         return result;
     }
-        
+
     private void putFeedAuthorsExtSync(@Nullable String feedId, @NonNull Collection<String> authors) {
         dbRW.delete(DatabaseConstants.FEED_AUTHORS_TABLE,
                     DatabaseConstants.FEED_AUTHORS_FEEDID + " = ?",
@@ -1559,12 +1559,12 @@ public class BlurDatabaseHelper {
 
     @NonNull
     public List<String> getAuthorsForFeed(@Nullable String feedId) {
-        Cursor c = dbRO.query(DatabaseConstants.FEED_AUTHORS_TABLE, 
-                              new String[]{DatabaseConstants.FEED_AUTHORS_AUTHOR}, 
-                              DatabaseConstants.FEED_AUTHORS_FEEDID + " = ?", 
-                              new String[]{feedId}, 
-                              null, 
-                              null, 
+        Cursor c = dbRO.query(DatabaseConstants.FEED_AUTHORS_TABLE,
+                              new String[]{DatabaseConstants.FEED_AUTHORS_AUTHOR},
+                              DatabaseConstants.FEED_AUTHORS_FEEDID + " = ?",
+                              new String[]{feedId},
+                              null,
+                              null,
                               DatabaseConstants.FEED_AUTHORS_AUTHOR + " ASC"
                              );
         List<String> result = new ArrayList<String>(c.getCount());

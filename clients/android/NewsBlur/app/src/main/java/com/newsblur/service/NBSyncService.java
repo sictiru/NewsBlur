@@ -12,6 +12,7 @@ import android.os.Process;
 import com.newsblur.NbApplication;
 import com.newsblur.R;
 import com.newsblur.database.BlurDatabaseHelper;
+
 import static com.newsblur.database.BlurDatabaseHelper.closeQuietly;
 import static com.newsblur.service.NbSyncManager.UPDATE_DB_READY;
 import static com.newsblur.service.NbSyncManager.UPDATE_METADATA;
@@ -431,7 +432,7 @@ public class NBSyncService extends JobService {
                 }
 
                 // don't block story loading unless this is a brand new action
-                if ((ra.getTried() > 0) && (PendingFeed != null)) continue actionsloop;
+                if ((ra.getTries() > 0) && (PendingFeed != null)) continue actionsloop;
                     
                 com.newsblur.util.Log.d(this, "attempting action: " + ra.toContentValues().toString());
                 NewsBlurResponse response = ra.doRemote(apiManager, dbHelper, stateFilter);
