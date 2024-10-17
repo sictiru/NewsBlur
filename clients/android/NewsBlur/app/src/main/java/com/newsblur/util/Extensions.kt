@@ -12,7 +12,7 @@ private const val TAG = "NBScope"
 
 fun <R> CoroutineScope.executeAsyncTask(
         onPreExecute: () -> Unit = { },
-        doInBackground: () -> R,
+        doInBackground: suspend () -> R,
         onPostExecute: (R) -> Unit = { }) =
         launch {
             withContext(Dispatchers.Main) { onPreExecute() }
