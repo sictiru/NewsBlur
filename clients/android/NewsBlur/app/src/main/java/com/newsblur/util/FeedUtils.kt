@@ -23,6 +23,10 @@ import com.newsblur.service.OriginalTextService
 import com.newsblur.util.FeedExt.disableNotification
 import com.newsblur.util.FeedExt.setNotifyFocus
 import com.newsblur.util.FeedExt.setNotifyUnread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class FeedUtils(
         private val dbHelper: BlurDatabaseHelper,
@@ -78,9 +82,7 @@ class FeedUtils(
     fun deleteSavedSearch(feedId: String?, query: String?) {
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    apiManager.deleteSearch(feedId, query)
-                },
-                onPostExecute = { newsBlurResponse ->
+                    val newsBlurResponse = apiManager.deleteSearch(feedId, query)
                     if (!newsBlurResponse.isError) {
                         dbHelper.deleteSavedSearch(feedId, query)
                         syncUpdateStatus(UPDATE_METADATA)
@@ -107,10 +109,10 @@ class FeedUtils(
         NBScope.executeAsyncTask(
                 doInBackground = {
                     apiManager.deleteFeed(feedId, folderName)
-                },
-                onPostExecute = {
                     // TODO: we can't check result.isError() because the delete call sets the .message property on all calls. find a better error check
                     dbHelper.deleteFeed(feedId)
+                },
+                onPostExecute = {
                     syncUpdateStatus(UPDATE_METADATA)
                 }
         )
@@ -120,10 +122,10 @@ class FeedUtils(
         NBScope.executeAsyncTask(
                 doInBackground = {
                     apiManager.unfollowUser(userId)
-                },
-                onPostExecute = {
                     // TODO: we can't check result.isError() because the delete call sets the .message property on all calls. find a better error check
                     dbHelper.deleteSocialFeed(userId)
+                },
+                onPostExecute = {
                     syncUpdateStatus(UPDATE_METADATA)
                 }
         )
@@ -173,7 +175,7 @@ class FeedUtils(
         )
     }
 
-    private fun setStoryReadState(story: Story, context: Context, read: Boolean) {
+    private suspend fun setStoryReadState(story: Story, context: Context, read: Boolean) {
         try {
             // this shouldn't throw errors, but crash logs suggest something is racing it for DB resources.
             // capture logs in hopes of finding the correlated action
@@ -200,10 +202,10 @@ class FeedUtils(
     /**
      * Mark a story (un)read when only the hash is known. This can and will cause a brief mismatch in
      * unread counts, or a longer mismatch if offline.  This method should only be used from outside
-     * the app, such as from a notifiation handler.  You must use setStoryReadState(Story, Context, boolean)
+     * the app, such as from a notification handler.  You must use setStoryReadState(Story, Context, boolean)
      * when calling from within the UI.
      */
-    fun setStoryReadStateExternal(storyHash: String?, context: Context, read: Boolean) {
+    suspend fun setStoryReadStateExternal(storyHash: String?, context: Context, read: Boolean) {
         val ra = if (read) ReadingAction.markStoryRead(storyHash) else ReadingAction.markStoryUnread(storyHash)
         dbHelper.enqueueAction(ra)
 
@@ -214,22 +216,22 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun markRead(activity: NbActivity, fs: FeedSet, olderThan: Long?, newerThan: Long?, choicesRid: Int) =
+    suspend fun markRead(activity: NbActivity, fs: FeedSet, olderThan: Long?, newerThan: Long?, choicesRid: Int): Unit =
             markRead(activity, fs, olderThan, newerThan, choicesRid, null)
 
     /**
      * Marks some or all of the stories in a FeedSet as read for an activity, handling confirmation dialogues as necessary.
      */
-    fun markRead(activity: NbActivity, fs: FeedSet, olderThan: Long?, newerThan: Long?, choicesRid: Int, callback: ReadingActionListener?) {
+    suspend fun markRead(activity: NbActivity, fs: FeedSet, olderThan: Long?, newerThan: Long?, choicesRid: Int, callback: ReadingActionListener?) {
         val ra: ReadingAction = if (fs.isAllNormal && (olderThan != null || newerThan != null)) {
             // the mark-all-read API doesn't support range bounding, so we need to pass each and every
             // feed ID to the API instead.
-            val newFeedSet = FeedSet.folder("all", dbHelper.allActiveFeeds)
+            val newFeedSet = FeedSet.folder("all", dbHelper.getAllActiveFeeds())
             ReadingAction.markFeedRead(newFeedSet, olderThan, newerThan)
         } else {
             if (fs.isFolder) {
                 val feedIds = fs.multipleFeeds
-                val allActiveFeedIds = dbHelper.allActiveFeeds
+                val allActiveFeedIds = dbHelper.getAllActiveFeeds()
                 val activeFeedIds: MutableSet<String> = HashSet()
                 activeFeedIds.addAll(feedIds)
                 activeFeedIds.retainAll(allActiveFeedIds)
@@ -259,24 +261,31 @@ class FeedUtils(
         }
         if (doImmediate) {
             doAction(ra, activity)
-            callback?.onReadingActionCompleted()
+            withContext(Dispatchers.Main) {
+                callback?.onReadingActionCompleted()
+            }
         } else {
             val title: String? = when {
                 fs.isAllNormal -> {
                     activity.resources.getString(R.string.all_stories)
                 }
+
                 fs.isFolder -> {
                     fs.folderName
                 }
+
                 fs.isSingleSocial -> {
                     dbHelper.getSocialFeed(fs.singleSocialFeed.key)?.feedTitle ?: ""
                 }
+
                 else -> {
                     dbHelper.getFeed(fs.singleFeed)?.title ?: ""
                 }
             }
-            val dialog = ReadingActionConfirmationFragment.newInstance(ra, title, optionalOverrideMessage, choicesRid, callback)
-            dialog.show(activity.supportFragmentManager, "dialog")
+            withContext(Dispatchers.Main) {
+                val dialog = ReadingActionConfirmationFragment.newInstance(ra, title, optionalOverrideMessage, choicesRid, callback)
+                dialog.show(activity.supportFragmentManager, "dialog")
+            }
         }
     }
 
@@ -334,19 +343,23 @@ class FeedUtils(
 
     fun sendStoryFull(story: Story?, context: Context) {
         if (story == null) return
-        var body = getStoryText(story.storyHash)
-        if (body.isNullOrEmpty() || body == OriginalTextService.NULL_STORY_TEXT) {
-            body = getStoryContent(story.storyHash)
+        NBScope.launch {
+            var body = getStoryText(story.storyHash)
+            if (body.isNullOrEmpty() || body == OriginalTextService.NULL_STORY_TEXT) {
+                body = getStoryContent(story.storyHash)
+            }
+            withContext(Dispatchers.Main) {
+                val intent = Intent(Intent.ACTION_SEND)
+                intent.type = "text/plain"
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.putExtra(Intent.EXTRA_SUBJECT, story.title)
+                intent.putExtra(Intent.EXTRA_TEXT, String.format(context.resources.getString(R.string.send_full), story.title, story.permalink, UIUtils.fromHtml(body)))
+                context.startActivity(Intent.createChooser(intent, "Send using"))
+            }
         }
-        val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "text/plain"
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        intent.putExtra(Intent.EXTRA_SUBJECT, story.title)
-        intent.putExtra(Intent.EXTRA_TEXT, String.format(context.resources.getString(R.string.send_full), story.title, story.permalink, UIUtils.fromHtml(body)))
-        context.startActivity(Intent.createChooser(intent, "Send using"))
     }
 
-    fun shareStory(story: Story, comment: String?, sourceUserIdString: String?, context: Context) {
+    suspend fun shareStory(story: Story, comment: String?, sourceUserIdString: String?, context: Context) {
         var sourceUserId = sourceUserIdString
         if (story.sourceUserId != null) {
             sourceUserId = story.sourceUserId
@@ -358,7 +371,7 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun renameFeed(context: Context, feedId: String?, newFeedName: String?) {
+    suspend fun renameFeed(context: Context, feedId: String?, newFeedName: String?) {
         val ra = ReadingAction.renameFeed(feedId, newFeedName)
         dbHelper.enqueueAction(ra)
         val impact = ra.doLocal(context, dbHelper)
@@ -366,7 +379,7 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun unshareStory(story: Story, context: Context) {
+    suspend fun unshareStory(story: Story, context: Context) {
         val ra = ReadingAction.unshareStory(story.storyHash, story.id, story.feedId)
         dbHelper.enqueueAction(ra)
         ra.doLocal(context, dbHelper)
@@ -374,7 +387,7 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun likeComment(story: Story, commentUserId: String?, context: Context) {
+    suspend fun likeComment(story: Story, commentUserId: String?, context: Context) {
         val ra = ReadingAction.likeComment(story.id, commentUserId, story.feedId)
         dbHelper.enqueueAction(ra)
         ra.doLocal(context, dbHelper)
@@ -382,7 +395,7 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun unlikeComment(story: Story, commentUserId: String?, context: Context) {
+    suspend fun unlikeComment(story: Story, commentUserId: String?, context: Context) {
         val ra = ReadingAction.unlikeComment(story.id, commentUserId, story.feedId)
         dbHelper.enqueueAction(ra)
         ra.doLocal(context, dbHelper)
@@ -390,7 +403,7 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun replyToComment(storyId: String?, feedId: String?, commentUserId: String?, replyText: String?, context: Context) {
+    suspend fun replyToComment(storyId: String?, feedId: String?, commentUserId: String?, replyText: String?, context: Context) {
         val ra = ReadingAction.replyToComment(storyId, feedId, commentUserId, replyText)
         dbHelper.enqueueAction(ra)
         ra.doLocal(context, dbHelper)
@@ -398,7 +411,7 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun updateReply(context: Context, story: Story, commentUserId: String?, replyId: String?, replyText: String?) {
+    suspend fun updateReply(context: Context, story: Story, commentUserId: String?, replyId: String?, replyText: String?) {
         val ra = ReadingAction.updateReply(story.id, story.feedId, commentUserId, replyId, replyText)
         dbHelper.enqueueAction(ra)
         ra.doLocal(context, dbHelper)
@@ -406,7 +419,7 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun deleteReply(context: Context, story: Story, commentUserId: String?, replyId: String?) {
+    suspend fun deleteReply(context: Context, story: Story, commentUserId: String?, replyId: String?) {
         val ra = ReadingAction.deleteReply(story.id, story.feedId, commentUserId, replyId)
         dbHelper.enqueueAction(ra)
         ra.doLocal(context, dbHelper)
@@ -438,7 +451,7 @@ class FeedUtils(
     private fun updateFeedActiveState(context: Context, feedIds: Set<String>, active: Boolean) {
         NBScope.executeAsyncTask(
                 doInBackground = {
-                    val activeFeeds = dbHelper.allActiveFeeds
+                    val activeFeeds = dbHelper.getAllActiveFeeds().toMutableSet()
                     for (feedId in feedIds) {
                         if (active) {
                             activeFeeds.add(feedId)
@@ -462,7 +475,7 @@ class FeedUtils(
         )
     }
 
-    fun instaFetchFeed(context: Context, feedId: String?) {
+    suspend fun instaFetchFeed(context: Context, feedId: String?) {
         val ra = ReadingAction.instaFetch(feedId)
         dbHelper.enqueueAction(ra)
         ra.doLocal(context, dbHelper)
@@ -470,18 +483,18 @@ class FeedUtils(
         triggerSync(context)
     }
 
-    fun getStoryText(hash: String?): String? = dbHelper.getStoryText(hash)
+    suspend fun getStoryText(hash: String?): String? = dbHelper.getStoryText(hash)
 
-    fun getStoryContent(hash: String?): String? = dbHelper.getStoryContent(hash)
+    suspend fun getStoryContent(hash: String?): String? = dbHelper.getStoryContent(hash)
 
     /**
      * Because story objects have to join on the feeds table to get feed metadata, there are times
      * where standalone stories are missing this info and it must be re-fetched.  This is costly
      * and should be avoided where possible.
      */
-    fun getFeedTitle(feedId: String?): String? = dbHelper.getFeed(feedId)?.title
+    suspend fun getFeedTitle(feedId: String?): String? = dbHelper.getFeed(feedId)?.title
 
-    fun getFeed(feedId: String?): Feed? = dbHelper.getFeed(feedId)
+    suspend fun getFeed(feedId: String?): Feed? = dbHelper.getFeed(feedId)
 
     fun openStatistics(context: Context?, feedId: String) {
         val url = APIConstants.buildUrl(APIConstants.PATH_FEED_STATISTICS + feedId)

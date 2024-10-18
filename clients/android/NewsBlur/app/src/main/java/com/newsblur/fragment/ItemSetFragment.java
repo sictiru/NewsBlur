@@ -224,7 +224,7 @@ public class ItemSetFragment extends NbFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        storiesViewModel.getActiveStoriesLiveData().observe(getViewLifecycleOwner(), this::setCursor);
+        storiesViewModel.getActiveStoriesCursor().observe(getViewLifecycleOwner(), this::setCursor);
 
         FeedSet fs = getFeedSet();
         if (fs == null) {

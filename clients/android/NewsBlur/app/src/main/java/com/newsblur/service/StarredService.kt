@@ -7,7 +7,7 @@ class StarredService(parent: NBSyncService) : SubService(parent) {
         var activelyRunning = false
     }
 
-    override fun exec() {
+    override suspend fun exec() {
         activelyRunning = true
 
         if (parent.stopSync()) return
@@ -18,7 +18,7 @@ class StarredService(parent: NBSyncService) : SubService(parent) {
         if (parent.stopSync()) return
 
         // get all starred story hashes from local db
-        val localStoryHashes = parent.dbHelper.starredStoryHashes
+        val localStoryHashes = parent.dbHelper.getStarredStoryHashes()
 
         if (parent.stopSync()) return
 

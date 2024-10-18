@@ -14,8 +14,10 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager.widget.ViewPager
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.google.android.material.progressindicator.CircularProgressIndicator
@@ -30,10 +32,10 @@ import com.newsblur.fragment.ReadingPagerFragment
 import com.newsblur.keyboard.KeyboardEvent
 import com.newsblur.keyboard.KeyboardListener
 import com.newsblur.keyboard.KeyboardManager
+import com.newsblur.service.NBSyncService
 import com.newsblur.service.NbSyncManager.UPDATE_REBUILD
 import com.newsblur.service.NbSyncManager.UPDATE_STATUS
 import com.newsblur.service.NbSyncManager.UPDATE_STORY
-import com.newsblur.service.NBSyncService
 import com.newsblur.util.AppConstants
 import com.newsblur.util.CursorFilters
 import com.newsblur.util.DefaultFeedView
@@ -54,8 +56,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -235,8 +239,14 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
     }
 
     private fun setupObservers() {
-        storiesViewModel.activeStoriesLiveData.observe(this) {
-            setCursorData(it)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    storiesViewModel.activeStoriesCursor.collectLatest { cursor ->
+                        cursor?.let { setCursorData(it) }
+                    }
+                }
+            }
         }
     }
 
@@ -264,7 +274,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
         }
     }
 
-    private fun setCursorData(cursor: Cursor) {
+    private suspend fun setCursorData(cursor: Cursor) {
         if (!dbHelper.isFeedSetReady(fs)) {
             com.newsblur.util.Log.i(this.javaClass.name, "stale load")
             // the system can and will re-use activities, so during the initial mismatch of
@@ -358,6 +368,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
                     Configuration.UI_MODE_NIGHT_UNDEFINED -> pager.setPageMarginDrawable(R.drawable.divider_light)
                 }
             }
+
             else -> {
             }
         }
@@ -383,14 +394,13 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
     /**
      * Query the DB for the current unreadcount for this view.
      */
-    private val unreadCount: Int
+    private suspend fun getUnreadCount(): Int {
         // saved stories and global shared stories don't have unreads
-        get() {
-            // saved stories and global shared stories don't have unreads
-            if (fs!!.isAllSaved || fs!!.isGlobalShared) return 0
-            val result = dbHelper.getUnreadCount(fs!!, intelState)
-            return if (result < 0) 0 else result
-        }
+        // saved stories and global shared stories don't have unreads
+        if (fs!!.isAllSaved || fs!!.isGlobalShared) return 0
+        val result = dbHelper.getUnreadCount(fs!!, intelState)
+        return if (result < 0) 0 else result
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (item.itemId == android.R.id.home) {
@@ -516,30 +526,34 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
      * Update the next/back overlay UI after the read-state of a story changes or we navigate in any way.
      */
     private fun updateOverlayNav() {
-        val currentUnreadCount = unreadCount
-        if (currentUnreadCount > startingUnreadCount) {
-            startingUnreadCount = currentUnreadCount
-        }
-        binding.readingOverlayLeft.isEnabled = getLastReadPosition(false) != -1
-        binding.readingOverlayRight.setText(if (currentUnreadCount > 0) R.string.overlay_next else R.string.overlay_done)
-        if (currentUnreadCount > 0) {
-            binding.readingOverlayRight.setBackgroundResource(UIUtils.getThemedResource(this, R.attr.selectorOverlayBackgroundRight, android.R.attr.background))
-        } else {
-            binding.readingOverlayRight.setBackgroundResource(UIUtils.getThemedResource(this, R.attr.selectorOverlayBackgroundRightDone, android.R.attr.background))
-        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            val currentUnreadCount = getUnreadCount()
+            withContext(Dispatchers.Main) {
+                if (currentUnreadCount > startingUnreadCount) {
+                    startingUnreadCount = currentUnreadCount
+                }
+                binding.readingOverlayLeft.isEnabled = getLastReadPosition(false) != -1
+                binding.readingOverlayRight.setText(if (currentUnreadCount > 0) R.string.overlay_next else R.string.overlay_done)
+                if (currentUnreadCount > 0) {
+                    binding.readingOverlayRight.setBackgroundResource(UIUtils.getThemedResource(this@Reading, R.attr.selectorOverlayBackgroundRight, android.R.attr.background))
+                } else {
+                    binding.readingOverlayRight.setBackgroundResource(UIUtils.getThemedResource(this@Reading, R.attr.selectorOverlayBackgroundRightDone, android.R.attr.background))
+                }
 
-        if (startingUnreadCount == 0) {
-            // sessions with no unreads just show a full progress bar
-            binding.readingOverlayProgress.max = 1
-            binding.readingOverlayProgress.progress = 1
-        } else {
-            val unreadProgress = startingUnreadCount - currentUnreadCount
-            binding.readingOverlayProgress.max = startingUnreadCount
-            binding.readingOverlayProgress.progress = unreadProgress
-        }
-        binding.readingOverlayProgress.invalidate()
+                if (startingUnreadCount == 0) {
+                    // sessions with no unreads just show a full progress bar
+                    binding.readingOverlayProgress.max = 1
+                    binding.readingOverlayProgress.progress = 1
+                } else {
+                    val unreadProgress = startingUnreadCount - currentUnreadCount
+                    binding.readingOverlayProgress.max = startingUnreadCount
+                    binding.readingOverlayProgress.progress = unreadProgress
+                }
+                binding.readingOverlayProgress.invalidate()
 
-        invalidateOptionsMenu()
+                invalidateOptionsMenu()
+            }
+        }
     }
 
     private fun updateOverlayText() {
@@ -614,17 +628,19 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
      * Click handler for the righthand overlay nav button.
      */
     private fun overlayRightClick() {
-        if (unreadCount <= 0) {
-            // if there are no unread stories, go back to the feed list
-            val i = Intent(this, Main::class.java)
-            i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            startActivity(i)
-            finish()
-        } else {
-            // if there are unreads, go to the next one
-            lifecycleScope.executeAsyncTask(
-                    doInBackground = { nextUnread() }
-            )
+        lifecycleScope.launch(Dispatchers.IO) {
+            val unreadCount = getUnreadCount()
+            if (unreadCount <= 0) {
+                withContext(Dispatchers.Main) {
+                    // if there are no unread stories, go back to the feed list
+                    val i = Intent(this@Reading, Main::class.java)
+                    i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    startActivity(i)
+                    finish()
+                }
+            } else {
+                nextUnread()
+            }
         }
     }
 
@@ -686,12 +702,17 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
             // We didn't find a story, so we should trigger a check to see if the API can load any more.
             // First, though, double check that there are even any left, as there may have been a delay
             // between marking an earlier one and double-checking counts.
-            if (unreadCount <= 0) {
-                unreadSearchActive = false
-            } else {
-                // trigger a check to see if there are any more to search before proceeding. By leaving the
-                // unreadSearchActive flag high, this method will be called again when a new cursor is loaded
-                checkStoryCount(readingAdapter!!.count + 1)
+            lifecycleScope.launch(Dispatchers.IO) {
+                val unreadCount = getUnreadCount()
+                withContext(Dispatchers.Main) {
+                    if (unreadCount <= 0) {
+                        unreadSearchActive = false
+                    } else {
+                        // trigger a check to see if there are any more to search before proceeding. By leaving the
+                        // unreadSearchActive flag high, this method will be called again when a new cursor is loaded
+                        checkStoryCount(readingAdapter!!.count + 1)
+                    }
+                }
             }
         }
     }
@@ -735,8 +756,13 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
      * Click handler for the progress indicator on the righthand overlay nav button.
      */
     private fun overlayProgressCountClick() {
-        val unreadText = getString(if (unreadCount == 1) R.string.overlay_count_toast_1 else R.string.overlay_count_toast_N)
-        Toast.makeText(this, String.format(unreadText, unreadCount), Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val unreadCount = getUnreadCount()
+            withContext(Dispatchers.Main) {
+                val unreadText = getString(if (unreadCount == 1) R.string.overlay_count_toast_1 else R.string.overlay_count_toast_N)
+                Toast.makeText(this@Reading, String.format(unreadText, unreadCount), Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun overlaySendClick() {
@@ -862,8 +888,10 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
             KeyboardEvent.Tutorial -> readingFragment?.showStoryShortcuts()
             KeyboardEvent.PageDown ->
                 readingFragment?.scrollVerticallyBy(UIUtils.dp2px(this, VERTICAL_SCROLL_DISTANCE_DP))
+
             KeyboardEvent.PageUp ->
                 readingFragment?.scrollVerticallyBy(UIUtils.dp2px(this, -VERTICAL_SCROLL_DISTANCE_DP))
+
             else -> {}
         }
     }

@@ -11,11 +11,12 @@ import com.newsblur.network.domain.CommentResponse
 import com.newsblur.network.domain.NewsBlurResponse
 import com.newsblur.network.domain.StoriesResponse
 import com.newsblur.service.NBSyncService
-import com.newsblur.service.NbSyncManager
 import com.newsblur.service.NbSyncManager.UPDATE_INTEL
 import com.newsblur.service.NbSyncManager.UPDATE_METADATA
 import com.newsblur.service.NbSyncManager.UPDATE_SOCIAL
 import com.newsblur.service.NbSyncManager.UPDATE_STORY
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.Serializable
 
 class ReadingAction private constructor(
@@ -83,7 +84,7 @@ class ReadingAction private constructor(
     /**
      * Execute this action remotely via the API.
      */
-    fun doRemote(apiManager: APIManager, dbHelper: BlurDatabaseHelper, stateFilter: StateFilter): NewsBlurResponse? {
+    suspend fun doRemote(apiManager: APIManager, dbHelper: BlurDatabaseHelper, stateFilter: StateFilter): NewsBlurResponse? = withContext(Dispatchers.IO) {
         // generic response to return
         var result: NewsBlurResponse? = null
         // optional specific responses that are locally actionable
@@ -125,7 +126,6 @@ class ReadingAction private constructor(
             }
 
             ActionType.RENAME_FEED -> result = apiManager.renameFeed(feedId, newFeedName)
-            else -> throw IllegalStateException("cannot execute uknown type of action.")
 
         }
         if (storiesResponse != null) {
@@ -135,7 +135,7 @@ class ReadingAction private constructor(
             } else {
                 Log.w(this, "failed to refresh story data after action")
             }
-            impact = impact or NbSyncManager.UPDATE_SOCIAL
+            impact = impact or UPDATE_SOCIAL
         }
         if (commentResponse != null) {
             result = commentResponse
@@ -144,12 +144,12 @@ class ReadingAction private constructor(
             } else {
                 Log.w(this, "failed to refresh comment data after action")
             }
-            impact = impact or NbSyncManager.UPDATE_SOCIAL
+            impact = impact or UPDATE_SOCIAL
         }
         if (result != null && impact != 0) {
             result.impactCode = impact
         }
-        return result
+        result
     }
 
     /**
@@ -159,7 +159,7 @@ class ReadingAction private constructor(
      *
      * @return the union of update impact flags that resulted from this action.
      */
-    fun doLocal(context: Context, dbHelper: BlurDatabaseHelper, isFollowup: Boolean = false): Int {
+    suspend fun doLocal(context: Context, dbHelper: BlurDatabaseHelper, isFollowup: Boolean = false): Int = withContext(Dispatchers.IO) {
         val userId = PrefsUtils.getUserId(context)
         var impact = 0
         when (type) {
@@ -180,13 +180,17 @@ class ReadingAction private constructor(
             }
 
             ActionType.SAVE -> {
-                dbHelper.setStoryStarred(storyHash, userTags, true)
-                impact = impact or UPDATE_METADATA
+                storyHash?.let {
+                    dbHelper.setStoryStarred(it, userTags, true)
+                    impact = impact or UPDATE_METADATA
+                }
             }
 
             ActionType.UNSAVE -> {
-                dbHelper.setStoryStarred(storyHash, null, false)
-                impact = impact or UPDATE_METADATA
+                storyHash?.let {
+                    dbHelper.setStoryStarred(it, null, false)
+                    impact = impact or UPDATE_METADATA
+                }
             }
 
             ActionType.SHARE -> {
@@ -264,7 +268,7 @@ class ReadingAction private constructor(
                 impact = impact or UPDATE_METADATA
             }
         }
-        return impact
+        impact
     }
 
     companion object {

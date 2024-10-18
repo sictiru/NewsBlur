@@ -19,11 +19,15 @@ import com.newsblur.domain.Comment
 import com.newsblur.domain.Story
 import com.newsblur.domain.UserDetails
 import com.newsblur.util.ImageLoader
+import com.newsblur.util.NBScope
 import com.newsblur.util.PrefsUtils
 import com.newsblur.util.UIUtils
 import com.newsblur.util.ViewUtils
 import com.newsblur.util.executeAsyncTask
 import com.newsblur.view.FlowLayout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 
 class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: View, inflater: LayoutInflater, story: Story?, iconLoader: ImageLoader) {
@@ -57,7 +61,7 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
         )
     }
 
-    private fun doInBackground() {
+    private suspend fun doInBackground() {
         if (context == null || story == null || story.id.isNullOrEmpty()) return
         comments.addAll(fragment.dbHelper.getComments(story.id!!))
 
@@ -106,10 +110,12 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
                     favouriteIcon.visibility = View.GONE
                 } else {
                     favouriteIcon.setOnClickListener {
-                        if (!mutableListOf<String>(*comment.likingUsers).contains(user.id)) {
-                            fragment.feedUtils.likeComment(story, comment.userId, context)
-                        } else {
-                            fragment.feedUtils.unlikeComment(story, comment.userId, context)
+                        NBScope.launch {
+                            if (!mutableListOf<String>(*comment.likingUsers).contains(user.id)) {
+                                fragment.feedUtils.likeComment(story, comment.userId, context)
+                            } else {
+                                fragment.feedUtils.unlikeComment(story, comment.userId, context)
+                            }
                         }
                     }
                 }
@@ -118,10 +124,14 @@ class SetupCommentSectionTask(private val fragment: ReadingItemFragment, view: V
                 replyIcon.visibility = View.INVISIBLE
             } else {
                 replyIcon.setOnClickListener {
-                    val user = fragment.dbHelper.getUserProfile(comment.userId)
-                    if (user != null) {
-                        val newFragment: DialogFragment = ReplyDialogFragment.newInstance(story, comment.userId, user.username)
-                        newFragment.show(manager, "dialog")
+                    NBScope.launch {
+                        val user = fragment.dbHelper.getUserProfile(comment.userId)
+                        withContext(Dispatchers.Main) {
+                            if (user != null) {
+                                val newFragment: DialogFragment = ReplyDialogFragment.newInstance(story, comment.userId, user.username)
+                                newFragment.show(manager, "dialog")
+                            }
+                        }
                     }
                 }
             }

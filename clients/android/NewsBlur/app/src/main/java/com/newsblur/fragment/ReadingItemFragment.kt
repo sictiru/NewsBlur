@@ -51,6 +51,7 @@ import com.newsblur.util.FileCache
 import com.newsblur.util.Font
 import com.newsblur.util.ImageLoader
 import com.newsblur.util.MarkStoryReadBehavior
+import com.newsblur.util.NBScope
 import com.newsblur.util.PrefConstants.ThemeValue
 import com.newsblur.util.PrefsUtils
 import com.newsblur.util.ReadingTextSize
@@ -59,6 +60,9 @@ import com.newsblur.util.StoryUtils
 import com.newsblur.util.UIUtils
 import com.newsblur.util.executeAsyncTask
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.regex.Pattern
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -433,10 +437,13 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
             true
         }
         R.id.menu_go_to_feed -> {
-            val feed = dbHelper.getFeed(story!!.feedId)
-            feed?.let {
-                val fs = FeedSet.singleFeed(it.feedId)
-                FeedItemsList.startActivity(requireContext(), fs, it, null, null)
+            NBScope.launch {
+                val feed = dbHelper.getFeed(story!!.feedId)
+                withContext(Dispatchers.Main) {
+                    if (feed != null) {
+                        FeedItemsList.startActivity(requireContext(), FeedSet.singleFeed(feed.feedId), feed, null, null)
+                    }
+                }
             }
             true
         }
@@ -450,8 +457,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
             val msg = if (it.read) {
                 feedUtils.markStoryUnread(it, requireContext())
                 getString(R.string.story_unread)
-            }
-            else {
+            } else {
                 feedUtils.markStoryAsRead(it, requireContext())
                 getString(R.string.story_read)
             }
@@ -468,7 +474,8 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
             readingItemActionsBinding.markReadStoryButton.visibility = View.GONE
         }
 
-        sampledQueue?.add { updateStoryReadTitleState.invoke() } ?: updateStoryReadTitleState.invoke()
+        sampledQueue?.add { updateStoryReadTitleState.invoke() }
+                ?: updateStoryReadTitleState.invoke()
     }
 
     fun openStoryTrainer() {
@@ -590,6 +597,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
                         chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.tag_green_text))
                         chip.chipIcon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_thumb_up_green)
                     }
+
                     Classifier.DISLIKE -> {
                         chip.setChipBackgroundColorResource(R.color.tag_red)
                         chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.tag_red_text))
@@ -690,6 +698,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
                     binding.readingTextmodefailed.visibility = View.VISIBLE
                     needStoryContent = true
                 }
+
                 originalText == null -> {
                     binding.readingTextloading.visibility = View.VISIBLE
                     enableProgress(true)
@@ -697,6 +706,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
                     // still show the story mode version, as the text mode one may take some time
                     needStoryContent = true
                 }
+
                 else -> {
                     setupWebview(originalText!!)
                     onContentLoadFinished()
@@ -750,8 +760,12 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
             setupItemCommentsAndShares()
         }
         if (updateType and UPDATE_INTEL != 0) {
-            classifier = dbHelper.getClassifierForFeed(story!!.feedId)
-            setupTagsAndIntel()
+            NBScope.launch {
+                classifier = dbHelper.getClassifierForFeed(story!!.feedId)
+                withContext(Dispatchers.Main) {
+                    setupTagsAndIntel()
+                }
+            }
         }
     }
 
@@ -862,25 +876,31 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
                     //                builder.append("<meta name=\"supported-color-schemes\" content=\"light\"/>");
                     builder.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"light_reading.css\" />")
                 }
+
                 ThemeValue.DARK -> {
                     builder.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"dark_reading.css\" />")
                 }
+
                 ThemeValue.BLACK -> {
                     builder.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"black_reading.css\" />")
                 }
+
                 ThemeValue.AUTO -> {
                     when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
                         Configuration.UI_MODE_NIGHT_YES -> {
                             builder.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"dark_reading.css\" />")
                         }
+
                         Configuration.UI_MODE_NIGHT_NO -> {
                             builder.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"light_reading.css\" />")
                         }
+
                         Configuration.UI_MODE_NIGHT_UNDEFINED -> {
                             builder.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"light_reading.css\" />")
                         }
                     }
                 }
+
                 else -> {
                 }
             }
@@ -1019,7 +1039,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
     }
 
     private fun setReadingFont(font: String) {
-       PrefsUtils.setFontString(requireContext(), font)
+        PrefsUtils.setFontString(requireContext(), font)
         contentHash = 0 // Force reload since content hasn't changed
         reloadStoryContent()
     }

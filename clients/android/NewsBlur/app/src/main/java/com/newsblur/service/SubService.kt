@@ -25,7 +25,7 @@ abstract class SubService(
 
     private var mainJob: Job? = null
 
-    protected abstract fun exec()
+    protected abstract suspend fun exec()
 
     fun start() {
         mainJob = coroutineScope.launch(Dispatchers.IO) {

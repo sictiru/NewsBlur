@@ -11,7 +11,6 @@ import android.os.Process;
 
 import com.newsblur.NbApplication;
 import com.newsblur.R;
-import com.newsblur.database.BlurDatabaseHelper;
 
 import static com.newsblur.database.BlurDatabaseHelper.closeQuietly;
 import static com.newsblur.service.NbSyncManager.UPDATE_DB_READY;
@@ -22,6 +21,7 @@ import static com.newsblur.service.NbSyncManager.UPDATE_STORY;
 
 import androidx.annotation.NonNull;
 
+import com.newsblur.database.BlurDatabaseHelper;
 import com.newsblur.database.DatabaseConstants;
 import com.newsblur.di.IconFileCache;
 import com.newsblur.di.StoryImageCache;
@@ -972,7 +972,7 @@ public class NBSyncService extends JobService {
         if (! PrefsUtils.isEnableNotifications(this)) return;
 
         // don't notify stories until the queue is flushed so they don't churn
-        if (UnreadsService.StoryHashQueue.size() > 0) return;
+        if (UnreadsService.storyHashQueue.size() > 0) return;
         // don't slow down active story loading
         if (PendingFeed != null) return;
 

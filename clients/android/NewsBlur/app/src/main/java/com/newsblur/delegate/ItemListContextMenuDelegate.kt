@@ -15,6 +15,8 @@ import com.newsblur.util.*
 import com.newsblur.util.FeedUtils.Companion.triggerSync
 import com.newsblur.util.ListTextSize.Companion.fromSize
 import com.newsblur.util.PrefConstants.ThemeValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 interface ItemListContextMenuDelegate {
     fun onCreateMenuOptions(menu: Menu, menuInflater: MenuInflater, fs: FeedSet): Boolean
@@ -171,7 +173,16 @@ open class ItemListContextMenuDelegateImpl(
             activity.finish()
             return true
         } else if (item.itemId == R.id.menu_mark_all_as_read) {
-            feedUtils.markRead(activity, fs, null, null, R.array.mark_all_read_options, this)
+            // pass in the scope once the calling class is Kt
+            NBScope.launch(Dispatchers.IO) {
+                feedUtils.markRead(
+                        activity = activity,
+                        fs = fs,
+                        olderThan = null,
+                        newerThan = null,
+                        choicesRid = R.array.mark_all_read_options,
+                        callback = this@ItemListContextMenuDelegateImpl)
+            }
             return true
         } else if (item.itemId == R.id.menu_story_order_newest) {
             updateStoryOrder(fragment, fs, StoryOrder.NEWEST)
