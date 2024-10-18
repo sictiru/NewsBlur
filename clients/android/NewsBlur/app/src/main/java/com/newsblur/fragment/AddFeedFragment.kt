@@ -26,6 +26,9 @@ import com.newsblur.service.NBSyncService
 import com.newsblur.util.AppConstants
 import com.newsblur.util.executeAsyncTask
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Collections
 import javax.inject.Inject
 
@@ -39,6 +42,7 @@ class AddFeedFragment : DialogFragment() {
     lateinit var dbHelper: BlurDatabaseHelper
 
     private lateinit var binding: DialogAddFeedBinding
+    private lateinit var adapter: AddFeedAdapter
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding = DialogAddFeedBinding.inflate(layoutInflater)
@@ -46,7 +50,7 @@ class AddFeedFragment : DialogFragment() {
         val builder = AlertDialog.Builder(requireActivity())
         builder.setTitle("Choose folder for " + requireArguments().getString(FEED_NAME))
         builder.setView(binding.root)
-        val adapter = AddFeedAdapter(object : OnFolderClickListener {
+        adapter = AddFeedAdapter(object : OnFolderClickListener {
             override fun onItemClick(folder: Folder) {
                 addFeed(requireActivity(), apiManager, folder.name)
             }
@@ -67,8 +71,17 @@ class AddFeedFragment : DialogFragment() {
         }
         binding.recyclerViewFolders.addItemDecoration(DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL))
         binding.recyclerViewFolders.adapter = adapter
-        adapter.setFolders(dbHelper.folders)
         return builder.create()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val folders = dbHelper.getFolders()
+            withContext(Dispatchers.Main) {
+                adapter.setFolders(folders)
+            }
+        }
     }
 
     private fun addFeedToNewFolder(activity: Activity, apiManager: APIManager, folderName: String) {

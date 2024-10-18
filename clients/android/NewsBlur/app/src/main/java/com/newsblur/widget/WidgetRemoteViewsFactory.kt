@@ -183,23 +183,25 @@ class WidgetRemoteViewsFactory(context: Context, intent: Intent) : RemoteViewsFa
      * Widget will show tap to config view when
      * empty stories and feeds maps are used
      */
-    private fun processStories(stories: Array<Story>) = storiesLock.withLock {
+    private suspend fun processStories(stories: Array<Story>) {
         Log.d(this.javaClass.name, "processStories")
         val feedMap = mutableMapOf<String, Feed>()
         val cursor = dbHelper.getFeedsCursor(cancellationSignal)
-        while (cursor != null && cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
             val feed = Feed.fromCursor(cursor)
             if (feed.active) {
                 feedMap[feed.feedId] = feed
             }
         }
 
-        for (story in stories) {
-            val storyFeed = feedMap[story.feedId]
-            storyFeed?.let { bindStoryValues(story, it) }
+        storiesLock.withLock {
+            for (story in stories) {
+                val storyFeed = feedMap[story.feedId]
+                storyFeed?.let { bindStoryValues(story, it) }
+            }
+            storyItems.clear()
+            storyItems.addAll(stories.toList())
         }
-        storyItems.clear()
-        storyItems.addAll(stories.toList())
     }
 
     private fun bindStoryValues(story: Story, feed: Feed) = story.apply {

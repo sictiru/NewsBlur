@@ -16,9 +16,13 @@ import com.newsblur.R
 import com.newsblur.database.BlurDatabaseHelper
 import com.newsblur.service.NBSyncService
 import com.newsblur.util.FeedUtils.Companion.triggerSync
+import com.newsblur.util.NBScope
 import com.newsblur.util.NotificationUtils
 import com.newsblur.util.PrefConstants
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -54,14 +58,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun deleteOfflineStories(pref: Preference) {
-        pref.apply {
-            onPreferenceClickListener = null
-            summary = ""
-            setTitle(R.string.menu_delete_offline_stories_confirmation)
+        NBScope.launch(Dispatchers.IO) {
+            dbHelper.deleteStories()
+            withContext(Dispatchers.Main) {
+                pref.apply {
+                    onPreferenceClickListener = null
+                    summary = ""
+                    setTitle(R.string.menu_delete_offline_stories_confirmation)
+                }
+                NBSyncService.forceFeedsFolders()
+                triggerSync(requireContext())
+            }
         }
-        dbHelper.deleteStories()
-        NBSyncService.forceFeedsFolders()
-        triggerSync(requireContext())
     }
 
     private fun checkEnableNotifications(isChecked: Boolean) {

@@ -67,10 +67,8 @@ class AllFoldersViewModel
 
     private fun getFeeds() {
         viewModelScope.launch(Dispatchers.IO) {
-            launch {
-                dbHelper.getFeedsCursor(cancellationSignal).let {
-                    _feeds.postValue(it)
-                }
+            dbHelper.getFeedsCursor(cancellationSignal).let {
+                _feeds.postValue(it)
             }
         }
     }

@@ -22,6 +22,9 @@ import com.newsblur.network.APIManager
 import com.newsblur.util.*
 import com.newsblur.view.ActivityDetailsAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -118,28 +121,36 @@ abstract class ProfileActivityDetailsFragment : Fragment(), OnItemClickListener 
             i.putExtra(Profile.USER_ID, activity.withUserId)
             context.startActivity(i)
         } else if (activity.category == ActivityDetails.Category.FEED_SUBSCRIPTION) {
-            val feed = dbHelper.getFeed(activity.feedId)
-            if (feed == null) {
-                Toast.makeText(context, R.string.profile_feed_not_available, Toast.LENGTH_SHORT).show()
-            } else {
-                /* TODO: starting the feed view activity also requires both a feedset and a folder name
-                   in order to properly function.  the latter, in particular, we could only guess at from
-                   the info we have here.  at best, we would launch a feed view with somewhat unpredictable
-                   delete behaviour. */
-                //Intent intent = new Intent(context, FeedItemsList.class);
-                //intent.putExtra(FeedItemsList.EXTRA_FEED, feed);
-                //context.startActivity(intent);
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val feed = dbHelper.getFeed(activity.feedId)
+                withContext(Dispatchers.Main) {
+                    if (feed == null) {
+                        Toast.makeText(context, R.string.profile_feed_not_available, Toast.LENGTH_SHORT).show()
+                    } else {
+                        /* TODO: starting the feed view activity also requires both a feedset and a folder name
+                       in order to properly function.  the latter, in particular, we could only guess at from
+                       the info we have here.  at best, we would launch a feed view with somewhat unpredictable
+                       delete behaviour. */
+                        //Intent intent = new Intent(context, FeedItemsList.class);
+                        //intent.putExtra(FeedItemsList.EXTRA_FEED, feed);
+                        //context.startActivity(intent);
+                    }
+                }
             }
         } else if (activity.category == ActivityDetails.Category.STAR) {
             UIUtils.startReadingActivity(context, FeedSet.allSaved(), activity.storyHash)
         } else if (isSocialFeedCategory(activity)) {
             // Strip the social: prefix from feedId
             val socialFeedId = activity.feedId.substring(7)
-            val feed = dbHelper.getSocialFeed(socialFeedId)
-            if (feed == null) {
-                Toast.makeText(context, R.string.profile_do_not_follow, Toast.LENGTH_SHORT).show()
-            } else {
-                UIUtils.startReadingActivity(context, FeedSet.singleSocialFeed(feed.userId, feed.username), activity.storyHash)
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                val feed = dbHelper.getSocialFeed(socialFeedId)
+                withContext(Dispatchers.Main) {
+                    if (feed == null) {
+                        Toast.makeText(context, R.string.profile_do_not_follow, Toast.LENGTH_SHORT).show()
+                    } else {
+                        UIUtils.startReadingActivity(context, FeedSet.singleSocialFeed(feed.userId, feed.username), activity.storyHash)
+                    }
+                }
             }
         }
     }
