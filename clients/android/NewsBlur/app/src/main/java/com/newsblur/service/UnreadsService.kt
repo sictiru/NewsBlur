@@ -174,8 +174,9 @@ class UnreadsService(
         var isDoMetadata: Boolean = false
             private set
 
+        @JvmStatic
         /** Unread story hashes the API listed that we do not appear to have locally yet.  */
-        private val storyHashQueue: MutableList<String> = ArrayList()
+        val storyHashQueue: MutableList<String> = ArrayList()
 
         @JvmStatic
         fun clear() {

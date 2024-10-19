@@ -182,7 +182,13 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
 
     override fun onResume() {
         super.onResume()
-        if (NBSyncService.isHousekeepingRunning()) finish()
+        lifecycleScope.launch(Dispatchers.IO) {
+            if (NBSyncService.isHousekeepingRunning) {
+                withContext(Dispatchers.Main) {
+                    this@Reading.finish()
+                }
+            }
+        }
         // this view shows stories, it is not safe to perform cleanup
         stopLoading = false
         // this is not strictly necessary, since our first refresh with the fs will swap in
