@@ -15,11 +15,16 @@ import com.newsblur.keyboard.KeyboardManager
 import com.newsblur.service.NBSyncService
 import com.newsblur.util.ListTextSize
 import com.newsblur.util.ListTextSize.Companion.fromSize
+import com.newsblur.util.NBScope
 import com.newsblur.util.PrefConstants.ThemeValue
+import com.newsblur.util.PrefsUtilsKt
 import com.newsblur.util.PrefsUtils
 import com.newsblur.util.SpacingStyle
 import com.newsblur.util.UIUtils
 import com.newsblur.widget.WidgetUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 interface MainContextMenuDelegate {
 
@@ -95,14 +100,18 @@ class MainContextMenuDelegateImpl(
             true
         }
         R.id.menu_feedback_email -> {
-            PrefsUtils.sendLogEmail(activity, dbHelper)
+            NBScope.launch { PrefsUtilsKt.sendLogEmail(activity, dbHelper) }
             true
         }
         R.id.menu_feedback_post -> {
             try {
-                val i = Intent(Intent.ACTION_VIEW)
-                i.data = Uri.parse(PrefsUtils.createFeedbackLink(activity, dbHelper))
-                activity.startActivity(i)
+                NBScope.launch {
+                    val i = Intent(Intent.ACTION_VIEW)
+                    i.data = Uri.parse(PrefsUtilsKt.createFeedbackLink(activity, dbHelper))
+                    withContext(Dispatchers.Main) {
+                        activity.startActivity(i)
+                    }
+                }
             } catch (e: Exception) {
                 Log.wtf(this.javaClass.name, "device cannot even open URLs to report feedback")
             }

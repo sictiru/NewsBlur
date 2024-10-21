@@ -479,7 +479,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
     }
 
     fun openStoryTrainer() {
-        val intelFrag = StoryIntelTrainerFragment.newInstance(story, fs)
+        val intelFrag = StoryIntelTrainerFragment.newInstance(story!!, fs)
         intelFrag.show(requireActivity().supportFragmentManager, StoryIntelTrainerFragment::class.java.name)
     }
 
@@ -569,12 +569,12 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
 
         binding.readingItemAuthors.setOnClickListener(View.OnClickListener {
             if (story!!.feedId == "0") return@OnClickListener  // cannot train on feedless stories
-            val intelFrag = StoryIntelTrainerFragment.newInstance(story, fs)
+            val intelFrag = StoryIntelTrainerFragment.newInstance(story!!, fs)
             intelFrag.show(parentFragmentManager, StoryIntelTrainerFragment::class.java.name)
         })
         binding.readingFeedTitle.setOnClickListener(View.OnClickListener {
             if (story!!.feedId == "0") return@OnClickListener  // cannot train on feedless stories
-            val intelFrag = StoryIntelTrainerFragment.newInstance(story, fs)
+            val intelFrag = StoryIntelTrainerFragment.newInstance(story!!, fs)
             intelFrag.show(parentFragmentManager, StoryIntelTrainerFragment::class.java.name)
         })
         binding.readingItemTitle.setOnClickListener { openBrowser() }
@@ -610,7 +610,7 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
             if (!(fs!!.isAllSaved || fs!!.singleSavedTag != null)) {
                 v.setOnClickListener {
                     if (story!!.feedId == "0") return@setOnClickListener   // cannot train on feedless stories
-                    val intelFrag = StoryIntelTrainerFragment.newInstance(story, fs)
+                    val intelFrag = StoryIntelTrainerFragment.newInstance(story!!, fs)
                     intelFrag.show(parentFragmentManager, StoryIntelTrainerFragment::class.java.name)
                 }
             }

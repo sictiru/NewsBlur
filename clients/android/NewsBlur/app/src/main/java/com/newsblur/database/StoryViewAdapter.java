@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import com.newsblur.R;
 import com.newsblur.activity.FeedItemsList;
@@ -458,10 +457,24 @@ public class StoryViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 feedUtils.markStoryUnread(story, context);
                 return true;
             } else if (item.getItemId() == R.id.menu_mark_older_stories_as_read) {
-                feedUtils.markRead(context, fs, story.timestamp, null, R.array.mark_older_read_options);
+                StoryViewAdapterKt.markReadAsync(
+                        feedUtils,
+                        context,
+                        fs,
+                        story.timestamp,
+                        null,
+                        R.array.mark_older_read_options
+                );
                 return true;
             } else if (item.getItemId() == R.id.menu_mark_newer_stories_as_read) {
-                feedUtils.markRead(context, fs, null, story.timestamp, R.array.mark_newer_read_options);
+                StoryViewAdapterKt.markReadAsync(
+                        feedUtils,
+                        context,
+                        fs,
+                        null,
+                        story.timestamp,
+                        R.array.mark_older_read_options
+                );
                 return true;
             } else if (item.getItemId() == R.id.menu_send_story) {
                 feedUtils.sendStoryUrl(story, context);
@@ -482,9 +495,7 @@ public class StoryViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 intelFrag.show(context.getSupportFragmentManager(), StoryIntelTrainerFragment.class.getName());
                 return true;
             } else if (item.getItemId() == R.id.menu_go_to_feed) {
-                FeedSet fs = FeedSet.singleFeed(story.feedId);
-                FeedItemsList.startActivity(context, fs,
-                        feedUtils.getFeed(story.feedId), null, null);
+                StoryViewAdapterKt.goToFeedAsync(feedUtils, context, story);
                 return true;
             } else {
                 return false;
