@@ -108,68 +108,6 @@ public class PrefsUtils {
         }
     }
 
-    public static String createFeedbackLink(Context context, @NonNull BlurDatabaseHelper dbHelper) {
-        StringBuilder s = new StringBuilder(AppConstants.FEEDBACK_URL);
-        s.append("<give us some feedback!>%0A%0A%0A");
-        String info = getDebugInfo(context, dbHelper);
-        s.append(info.replace("\n", "%0A"));
-        return s.toString();
-    }
-
-    public static void sendLogEmail(Context context, @NonNull BlurDatabaseHelper dbHelper) {
-        File f = com.newsblur.util.Log.getLogfile();
-        if (f == null) return;
-        String debugInfo = "Tell us a bit about your problem:\n\n\n\n" + getDebugInfo(context, dbHelper);
-        android.net.Uri localPath = FileProvider.getUriForFile(context, "com.newsblur.fileprovider", f);
-        Intent i = new Intent(Intent.ACTION_SEND);
-        i.setType("*/*");
-        i.putExtra(Intent.EXTRA_EMAIL, new String[]{"android@newsblur.com"});
-        i.putExtra(Intent.EXTRA_SUBJECT, "Android logs (" + getUserDetails(context).username + ")");
-        i.putExtra(Intent.EXTRA_TEXT, debugInfo);
-        i.putExtra(Intent.EXTRA_STREAM, localPath);
-        if (i.resolveActivity(context.getPackageManager()) != null) {
-            context.startActivity(i);
-        }
-    }
-
-    private static String getDebugInfo(Context context, @NonNull BlurDatabaseHelper dbHelper) {
-        StringBuilder s = new StringBuilder();
-        s.append("app version: ").append(getVersion(context));
-        s.append("\n");
-        s.append("android version: ").append(Build.VERSION.RELEASE).append(" (").append(Build.DISPLAY).append(")");
-        s.append("\n");
-        s.append("device: ").append(Build.MANUFACTURER).append(" ").append(Build.MODEL).append(" (").append(Build.BOARD).append(")");
-        s.append("\n");
-        s.append("sqlite version: ").append(dbHelper.getEngineVersion());
-        s.append("\n");
-        s.append("username: ").append(getUserDetails(context).username);
-        s.append("\n");
-        s.append("server: ").append(APIConstants.isCustomServer() ? "custom" : "default");
-        s.append("\n");
-        s.append("speed: ").append(NBSyncService.getSpeedInfo());
-        s.append("\n");
-        s.append("pending actions: ").append(NBSyncService.getPendingInfo());
-        s.append("\n");
-        s.append("premium: ");
-        if (NBSyncService.isPremium == Boolean.TRUE) {
-            s.append("yes");
-        } else if (NBSyncService.isPremium == Boolean.FALSE) {
-            s.append("no");
-        } else {
-            s.append("unknown");
-        }
-        s.append("\n");
-        s.append("prefetch: ").append(isOfflineEnabled(context) ? "yes" : "no");
-        s.append("\n");
-        s.append("notifications: ").append(isEnableNotifications(context) ? "yes" : "no");
-        s.append("\n");
-        s.append("keepread: ").append(isKeepOldStories(context) ? "yes" : "no");
-        s.append("\n");
-        s.append("thumbs: ").append(isShowThumbnails(context) ? "yes" : "no");
-        s.append("\n");
-        return s.toString();
-    }
-
     public static void logout(Context context, @NonNull BlurDatabaseHelper dbHelper) {
         NBSyncService.softInterrupt();
         NBSyncService.clearState();
@@ -708,7 +646,7 @@ public class PrefsUtils {
         editor.commit();
     }
 
-    private static boolean isShowThumbnails(Context context) {
+    public static boolean isShowThumbnails(Context context) {
         return getThumbnailStyle(context) != ThumbnailStyle.OFF;
     }
 
