@@ -1,8 +1,8 @@
 plugins {
     id(Plugins.androidApplication)
     kotlin(Plugins.kotlinAndroid)
-    kotlin(Plugins.kotlinKapt)
     id(Plugins.hiltAndroid)
+    id(Plugins.ksp)
 }
 
 android {
@@ -65,7 +65,7 @@ dependencies {
     implementation(Dependencies.lifecycleProcess)
     implementation(Dependencies.splashScreen)
     implementation(Dependencies.hiltAndroid)
-    kapt(Dependencies.hiltCompiler)
+    ksp(Dependencies.hiltCompiler)
     implementation(Dependencies.profileInstaller)
 
     testImplementation(Dependencies.junit)

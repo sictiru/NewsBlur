@@ -25,7 +25,6 @@ import com.newsblur.util.FeedExt.setNotifyFocus
 import com.newsblur.util.FeedExt.setNotifyUnread
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 class FeedUtils(
@@ -475,12 +474,17 @@ class FeedUtils(
         )
     }
 
-    suspend fun instaFetchFeed(context: Context, feedId: String?) {
-        val ra = ReadingAction.instaFetch(feedId)
-        dbHelper.enqueueAction(ra)
-        ra.doLocal(context, dbHelper)
-        syncUpdateStatus(UPDATE_METADATA)
-        triggerSync(context)
+    // not suspended due to calling Java classes
+    fun instaFetchFeed(context: Context, feedId: String?) {
+        NBScope.launch {
+            val ra = ReadingAction.instaFetch(feedId)
+            dbHelper.enqueueAction(ra)
+            ra.doLocal(context, dbHelper)
+            withContext(Dispatchers.Main) {
+                syncUpdateStatus(UPDATE_METADATA)
+                triggerSync(context)
+            }
+        }
     }
 
     suspend fun getStoryText(hash: String?): String? = dbHelper.getStoryText(hash)
