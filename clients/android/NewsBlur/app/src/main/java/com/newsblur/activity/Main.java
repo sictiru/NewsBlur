@@ -177,8 +177,7 @@ public class Main extends NbActivity implements StateChangedListener, SwipeRefre
         // will be required, however inefficient
         folderFeedList.hasUpdated();
 
-        NBSyncService.resetReadingSession(dbHelper);
-        NBSyncService.flushRecounts();
+        MainKt.resetReadingSessionAndFlushRecountsAsync(dbHelper);
 
         updateStatusIndicators();
         folderFeedList.pushUnreadCounts();

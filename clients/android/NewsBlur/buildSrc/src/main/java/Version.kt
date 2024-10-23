@@ -2,7 +2,9 @@ object Version {
 
     const val android = "8.5.0"
 
-    const val kotlin = "1.9.23"
+    const val kotlin = "1.9.24"
+
+    const val ksp = "1.9.24-1.0.20"
 
     const val fragment = "1.8.0"
     const val recyclerView = "1.3.2"
