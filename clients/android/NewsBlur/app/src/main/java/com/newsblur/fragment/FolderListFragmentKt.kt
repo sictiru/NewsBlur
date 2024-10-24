@@ -27,6 +27,7 @@ import com.newsblur.util.SessionDataSource
 import com.newsblur.util.StateFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 object FolderListFragmentKt {
@@ -122,6 +123,34 @@ object FolderListFragmentKt {
                     activity.startActivity(intent)
                 }
             }
+        }
+    }
+
+    @JvmStatic
+    fun getGroupBlocking(
+            adapter: FolderListAdapter,
+            dbHelper: BlurDatabaseHelper,
+            currentState: StateFilter,
+            groupPosition: Int,
+    ): FeedSet = runBlocking {
+        if (adapter.isRowGlobalSharedStories(groupPosition)) {
+            FeedSet.globalShared()
+        } else if (adapter.isRowAllSharedStories(groupPosition)) {
+            FeedSet.allSocialFeeds()
+        } else if (adapter.isRowAllStories(groupPosition)) {
+            if (currentState == StateFilter.SAVED) FeedSet.allSaved()
+            else FeedSet.allFeeds()
+        } else if (adapter.isRowInfrequentStories(groupPosition)) {
+            FeedSet.infrequentFeeds()
+        } else if (adapter.isRowReadStories(groupPosition)) {
+            FeedSet.allRead()
+        } else if (adapter.isRowSavedStories(groupPosition)) {
+            FeedSet.allSaved()
+        } else {
+            val folderName: String = adapter.getGroupFolderName(groupPosition)
+            val fs: FeedSet = dbHelper.feedSetFromFolderName(folderName)
+            if (currentState == StateFilter.SAVED) fs.isFilterSaved = true
+            fs
         }
     }
 

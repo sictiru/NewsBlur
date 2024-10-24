@@ -43,6 +43,7 @@ import com.newsblur.domain.Folder;
 import com.newsblur.domain.SavedSearch;
 import com.newsblur.domain.StarredCount;
 import com.newsblur.domain.SocialFeed;
+import com.newsblur.fragment.FolderListFragmentKt;
 import com.newsblur.util.Session;
 import com.newsblur.util.AppConstants;
 import com.newsblur.util.FeedListOrder;
@@ -399,25 +400,13 @@ public class FolderListAdapter extends BaseExpandableListAdapter {
 
     @Override
 	public synchronized FeedSet getGroup(int groupPosition) {
-        if (isRowGlobalSharedStories(groupPosition)) {
-            return FeedSet.globalShared();
-        } else if (isRowAllSharedStories(groupPosition)) {
-            return FeedSet.allSocialFeeds();
-        } else if (isRowAllStories(groupPosition)) {
-            if (currentState == StateFilter.SAVED) return FeedSet.allSaved();
-            return FeedSet.allFeeds();
-        } else if (isRowInfrequentStories(groupPosition)) {
-            return FeedSet.infrequentFeeds();
-        } else if (isRowReadStories(groupPosition)) {
-            return FeedSet.allRead();
-        } else if (isRowSavedStories(groupPosition)) {
-            return FeedSet.allSaved();
-        } else {
-            String folderName = getGroupFolderName(groupPosition);
-            FeedSet fs = dbHelper.feedSetFromFolderName(folderName);
-            if (currentState == StateFilter.SAVED) fs.setFilterSaved(true);
-            return fs;
-        }
+        // really not great to block here
+        return FolderListFragmentKt.getGroupBlocking(
+                this,
+                dbHelper,
+                currentState,
+                groupPosition
+        );
 	}
 
     /**
