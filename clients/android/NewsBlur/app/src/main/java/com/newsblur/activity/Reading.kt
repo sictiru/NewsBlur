@@ -183,7 +183,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
     override fun onResume() {
         super.onResume()
         lifecycleScope.launch(Dispatchers.IO) {
-            if (NBSyncService.isHousekeepingRunning) {
+            if (NBSyncService.isHousekeepingRunning()) {
                 withContext(Dispatchers.Main) {
                     this@Reading.finish()
                 }

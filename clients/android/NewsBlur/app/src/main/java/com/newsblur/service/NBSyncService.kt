@@ -1002,8 +1002,7 @@ class NBSyncService : JobService() {
         private var StorySyncRunning = false
 
         @Volatile
-        var isHousekeepingRunning: Boolean = false
-            private set
+        private var isHousekeepingRunning: Boolean = false
 
         @Volatile
         private var RecountsRunning = false
@@ -1297,5 +1296,8 @@ class NBSyncService : JobService() {
                 s.append(" post:").append(FollowupActions.size)
                 return s.toString()
             }
+
+        @JvmStatic
+        fun isHousekeepingRunning() = isHousekeepingRunning
     }
 }
