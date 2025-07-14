@@ -9,6 +9,7 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -19,6 +20,9 @@ import com.newsblur.util.FeedUtils.Companion.triggerSync
 import com.newsblur.util.NotificationUtils
 import com.newsblur.util.PrefConstants
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -59,9 +63,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
             summary = ""
             setTitle(R.string.menu_delete_offline_stories_confirmation)
         }
-        dbHelper.deleteStories()
-        NBSyncService.forceFeedsFolders()
-        triggerSync(requireContext())
+        lifecycleScope.launch(Dispatchers.IO) {
+            dbHelper.deleteStories()
+            withContext(Dispatchers.Main) {
+                NBSyncService.forceFeedsFolders()
+                triggerSync(requireContext())
+            }
+        }
     }
 
     private fun checkEnableNotifications(isChecked: Boolean) {
