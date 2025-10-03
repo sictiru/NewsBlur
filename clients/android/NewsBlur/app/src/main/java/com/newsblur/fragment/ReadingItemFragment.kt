@@ -62,6 +62,7 @@ import com.newsblur.util.StoryUtils
 import com.newsblur.util.UIUtils
 import com.newsblur.util.executeAsyncTask
 import com.newsblur.viewModel.ReadingItemViewModel
+import com.newsblur.viewModel.ReadingViewModel
 import com.newsblur.web.WebviewActionType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -144,10 +145,12 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
     private var sampledQueue: SampledQueue? = null
 
     private lateinit var viewModel: ReadingItemViewModel
+    private lateinit var readingViewModel: ReadingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this)[ReadingItemViewModel::class.java]
+        readingViewModel = ViewModelProvider(requireActivity())[ReadingViewModel::class.java]
 
         story = requireArguments().getSerializable("story") as Story?
 
@@ -168,19 +171,23 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
         if (markStoryReadBehavior == MarkStoryReadBehavior.IMMEDIATELY) {
             sampledQueue = SampledQueue(250, 5)
         }
-        if (savedInstanceState != null) {
-            savedScrollPosRel = savedInstanceState.getFloat(BUNDLE_SCROLL_POS_REL)
-            // we can't actually use the saved scroll position until the webview finishes loading
-        }
 
         story?.let { storyHighlights.addAll(it.highlights) }
     }
 
     override fun onSaveInstanceState(savedInstanceState: Bundle) {
         super.onSaveInstanceState(savedInstanceState)
-        val heightm = binding.readingScrollview.getChildAt(0).measuredHeight
-        val pos = binding.readingScrollview.scrollY
-        savedInstanceState.putFloat(BUNDLE_SCROLL_POS_REL, pos.toFloat() / heightm)
+        val totalHeight = (binding.readingScrollview.getChildAt(0)?.measuredHeight ?: 1)
+        if (totalHeight > 0) {
+            val rel = (binding.readingScrollview.scrollY.toFloat() / totalHeight).coerceIn(0f, 1f)
+            savedInstanceState.putFloat(BUNDLE_SCROLL_POS_REL, rel)
+        }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        savedScrollPosRel = savedInstanceState?.getFloat(BUNDLE_SCROLL_POS_REL)
+                ?: readingViewModel.getScroll(story!!.storyHash)
     }
 
     override fun onDestroyView() {
@@ -188,9 +195,12 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
         super.onDestroyView()
     }
 
-    // WebViews don't automatically pause content like audio and video when they lose focus.  Chain our own
-    // state into the webview so it behaves.
     override fun onPause() {
+        val totalHeight = (binding.readingScrollview.getChildAt(0)?.measuredHeight ?: 1)
+        if (totalHeight > 0) {
+            val rel = (binding.readingScrollview.scrollY.toFloat() / totalHeight).coerceIn(0f, 1f)
+            readingViewModel.setScroll(story!!.storyHash, rel)
+        }
         binding.readingWebview.onPause()
         super.onPause()
     }
@@ -1038,8 +1048,12 @@ class ReadingItemFragment : NbFragment(), PopupMenu.OnMenuItemClickListener {
             // an additional fixed delay is added in a last ditch attempt to give the black-box platform
             // threads a chance to finish their work.
             binding.readingScrollview.postDelayed({
-                val relPos = (binding.readingScrollview.getChildAt(0).measuredHeight * savedScrollPosRel).roundToInt()
-                binding.readingScrollview.scrollTo(0, relPos)
+                val total = (binding.readingScrollview.getChildAt(0)?.measuredHeight ?: 1)
+                val y = (total * savedScrollPosRel).roundToInt()
+                binding.readingScrollview.scrollTo(0, y)
+
+                savedScrollPosRel = 0f
+                readingViewModel.setScroll(story!!.storyHash, 0f)
             }, 75L)
         }
     }

@@ -13,10 +13,10 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.viewpager.widget.ViewPager
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.newsblur.R
 import com.newsblur.database.ReadingAdapter
@@ -41,7 +41,6 @@ import com.newsblur.util.FeedSet
 import com.newsblur.util.FeedUtils
 import com.newsblur.util.ImageLoader
 import com.newsblur.util.MarkStoryReadBehavior
-import com.newsblur.util.PrefConstants.ThemeValue
 import com.newsblur.util.StateFilter
 import com.newsblur.util.UIUtils
 import com.newsblur.util.ViewUtils
@@ -59,7 +58,7 @@ import javax.inject.Inject
 import kotlin.math.abs
 
 @AndroidEntryPoint
-abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListener, KeyboardListener {
+abstract class Reading : NbActivity(), ScrollChangeListener, KeyboardListener {
 
     @Inject
     lateinit var feedUtils: FeedUtils
@@ -77,7 +76,7 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
     // We can find it once we have the cursor.
     private var storyHash: String? = null
 
-    private var pager: ViewPager? = null
+    private var pager: ViewPager2? = null
     private var readingAdapter: ReadingAdapter? = null
     private var stopLoading = false
     private var unreadSearchActive = false
@@ -107,6 +106,8 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
     private lateinit var intelState: StateFilter
     private lateinit var binding: ActivityReadingBinding
     private lateinit var storiesViewModel: StoriesViewModel
+
+    private var pagerCallback: ViewPager2.OnPageChangeCallback? = null
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -195,6 +196,12 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
         } else {
             stopLoading = true
         }
+    }
+
+    override fun onDestroy() {
+        pagerCallback?.let { pager?.unregisterOnPageChangeCallback(it) }
+        pagerCallback = null
+        super.onDestroy()
     }
 
     override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, newConfig: Configuration) {
@@ -342,32 +349,35 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
      * activity, we need a way to get access to the pager when it is created and only
      * then can we set it up.
      */
-    fun offerPager(pager: ViewPager, childFragmentManager: FragmentManager) {
+    fun offerPager(
+            pager: ViewPager2,
+            childFragmentManager: FragmentManager,
+            lifecycle: Lifecycle,
+    ) {
         this.pager = pager
 
         // since it might start on the wrong story, create the pager as invisible
         pager.visibility = View.INVISIBLE
-        pager.pageMargin = UIUtils.dp2px(this, 1)
-
-        when (prefsRepo.getSelectedTheme()) {
-            ThemeValue.LIGHT -> pager.setPageMarginDrawable(R.drawable.divider_light)
-            ThemeValue.DARK, ThemeValue.BLACK -> pager.setPageMarginDrawable(R.drawable.divider_dark)
-            ThemeValue.AUTO -> {
-                when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-                    Configuration.UI_MODE_NIGHT_YES -> pager.setPageMarginDrawable(R.drawable.divider_dark)
-                    Configuration.UI_MODE_NIGHT_NO -> pager.setPageMarginDrawable(R.drawable.divider_light)
-                    Configuration.UI_MODE_NIGHT_UNDEFINED -> pager.setPageMarginDrawable(R.drawable.divider_light)
-                }
-            }
-        }
 
         var showFeedMetadata = true
         if (fs!!.isSingleNormal) showFeedMetadata = false
         var sourceUserId: String? = null
         if (fs!!.singleSocialFeed != null) sourceUserId = fs!!.singleSocialFeed.key
-        readingAdapter = ReadingAdapter(childFragmentManager, sourceUserId, showFeedMetadata, this, dbHelper)
+
+        readingAdapter = ReadingAdapter(
+                hostFragmentManager = childFragmentManager,
+                lifecycle = lifecycle,
+                sourceUserId = sourceUserId,
+                showFeedMetadata = showFeedMetadata,
+                activity = this,
+                dbHelper = dbHelper,
+        )
 
         pager.adapter = readingAdapter
+
+        pagerCallback = object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) = this@Reading.onPageSelected(position)
+        }.also { pager.registerOnPageChangeCallback(it) }
 
         // if the first story in the list was "viewed" before the page change listener was set,
         // the calback was probably missed
@@ -401,6 +411,8 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
     }
 
     override fun handleUpdate(updateType: Int) {
+        if (supportFragmentManager.isStateSaved) return
+
         if (updateType and UPDATE_REBUILD != 0) {
             finish()
         }
@@ -424,23 +436,19 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
 
         // update the current fragment
         val currentPosition = pager?.currentItem ?: return
-        val currentFragment = readingAdapter?.getExistingItem(currentPosition)
-        currentFragment?.handleUpdate(updateType)
+
+        fragmentAt(currentPosition)?.handleUpdate(updateType)
 
         // send the update to the previous and next fragments because the update could
         // be for one of them to load the on demand fetched content
-        val prevFragment = readingAdapter?.getExistingItem(currentPosition - 1)
-        val nextFragment = readingAdapter?.getExistingItem(currentPosition + 1)
+        val prevFragment = fragmentAt(currentPosition - 1)
         prevFragment?.let { if (it.shouldReceiveUpdateText(updateType)) it.handleUpdate(updateType) }
+
+        val nextFragment = fragmentAt(currentPosition + 1)
         nextFragment?.let { if (it.shouldReceiveUpdateText(updateType)) it.handleUpdate(updateType) }
     }
 
-    // interface OnPageChangeListener
-    override fun onPageScrollStateChanged(arg0: Int) {}
-
-    override fun onPageScrolled(arg0: Int, arg1: Float, arg2: Int) {}
-
-    override fun onPageSelected(position: Int) {
+    private fun onPageSelected(position: Int) {
         lifecycleScope.executeAsyncTask(
                 doInBackground = {
                     readingAdapter?.let { readingAdapter ->
@@ -758,17 +766,19 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
     }
 
     private val readingFragment: ReadingItemFragment?
-        get() = if (readingAdapter == null || pager == null) null
-        else readingAdapter!!.getExistingItem(pager!!.currentItem)
+        get() {
+            val vp = pager ?: return null
+            return fragmentAt(vp.currentItem)
+        }
 
     fun viewModeChanged() {
-        var frag = readingAdapter!!.getExistingItem(pager!!.currentItem)
-        frag?.viewModeChanged()
-        // fragments to the left or the right may have already preloaded content and need to also switch
-        frag = readingAdapter!!.getExistingItem(pager!!.currentItem - 1)
-        frag?.viewModeChanged()
-        frag = readingAdapter!!.getExistingItem(pager!!.currentItem + 1)
-        frag?.viewModeChanged()
+        val vp = pager ?: return
+        val currentPosition = vp.currentItem
+
+        fragmentAt(currentPosition)?.viewModeChanged()
+        fragmentAt(currentPosition - 1)?.viewModeChanged()
+        fragmentAt(currentPosition + 1)?.viewModeChanged()
+
         updateOverlayText()
     }
 
@@ -867,8 +877,10 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
             KeyboardEvent.Tutorial -> readingFragment?.showStoryShortcuts()
             KeyboardEvent.PageDown ->
                 readingFragment?.scrollVerticallyBy(UIUtils.dp2px(this, VERTICAL_SCROLL_DISTANCE_DP))
+
             KeyboardEvent.PageUp ->
                 readingFragment?.scrollVerticallyBy(UIUtils.dp2px(this, -VERTICAL_SCROLL_DISTANCE_DP))
+
             else -> {}
         }
     }
@@ -885,6 +897,12 @@ abstract class Reading : NbActivity(), OnPageChangeListener, ScrollChangeListene
             }
         })
         super.finish()
+    }
+
+    private fun fragmentAt(position: Int): ReadingItemFragment? {
+        val adapter = readingAdapter ?: return null
+        if (position < 0 || position >= adapter.itemCount) return null
+        return adapter.findFragmentForPosition(position)
     }
 
     companion object {
