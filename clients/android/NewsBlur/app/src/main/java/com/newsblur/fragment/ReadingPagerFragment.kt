@@ -5,11 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.MarginPageTransformer
 import com.newsblur.R
 import com.newsblur.activity.Reading
 import com.newsblur.databinding.FragmentReadingpagerBinding
-import com.newsblur.util.UIUtils
 
 /*
  * A fragment to hold the story pager.  Eventually this fragment should hold much of the UI and logic
@@ -25,7 +23,6 @@ class ReadingPagerFragment : NbFragment() {
 
         val activity = (activity as Reading?)
 
-        binding.readingPager.setPageTransformer(MarginPageTransformer(UIUtils.dp2px(requireContext(), 1)))
         (binding.readingPager.getChildAt(0) as? RecyclerView)?.overScrollMode = View.OVER_SCROLL_NEVER
 
         activity?.offerPager(
