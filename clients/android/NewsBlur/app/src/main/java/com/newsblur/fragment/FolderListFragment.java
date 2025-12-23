@@ -47,11 +47,13 @@ import com.newsblur.domain.SavedSearch;
 import com.newsblur.domain.SocialFeed;
 import com.newsblur.preference.PrefsRepo;
 import com.newsblur.util.AppConstants;
+import com.newsblur.util.FolderExpansionState;
 import com.newsblur.util.FeedExt;
 import com.newsblur.util.FeedSet;
 import com.newsblur.util.FeedUtils;
 import com.newsblur.util.ImageLoader;
 import com.newsblur.util.ListTextSize;
+import com.newsblur.util.PrefsFolderExpansionState;
 import com.newsblur.util.Session;
 import com.newsblur.util.SessionDataSource;
 import com.newsblur.util.SpacingStyle;
@@ -98,13 +100,15 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
     private Feed lastMenuFeed;
 
     private FolderListUiState lastState;
+    private FolderExpansionState folderExpansionState;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         allFoldersViewModel = new ViewModelProvider(this).get(AllFoldersViewModel.class);
         currentState = prefsRepo.getStateFilter();
-        adapter = new FolderListAdapter(getActivity(), currentState, iconLoader, dbHelper, prefsRepo);
+        folderExpansionState = new PrefsFolderExpansionState(prefsRepo);
+        adapter = new FolderListAdapter(getActivity(), currentState, iconLoader, dbHelper, prefsRepo, folderExpansionState);
         feedUtils.currentFolderName = null;
         // NB: it is by design that loaders are not started until we get a
         // ping from the sync service indicating that it has initialised
@@ -207,22 +211,29 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
      * unless expressly collapsed at some point.
      */
     public void checkOpenFolderPreferences() {
-        // make sure we didn't beat construction
         if (this.binding.folderfeedList == null) return;
+
+        boolean anyChange = false;
 
         for (int i = 0; i < adapter.getGroupCount(); i++) {
             String flatGroupName = adapter.getGroupUniqueName(i);
-            if (prefsRepo.getBoolean(AppConstants.FOLDER_PRE + "_" + flatGroupName, true)) {
-                if (binding.folderfeedList.isGroupExpanded(i) == false) {
+            boolean shouldBeExpanded = folderExpansionState.isExpanded(flatGroupName);
+
+            if (shouldBeExpanded) {
+                if (!binding.folderfeedList.isGroupExpanded(i)) {
                     binding.folderfeedList.expandGroup(i);
-                    adapter.setFolderClosed(flatGroupName, false);
+                    anyChange = true;
                 }
             } else {
-                if (binding.folderfeedList.isGroupExpanded(i) == true) {
+                if (binding.folderfeedList.isGroupExpanded(i)) {
                     binding.folderfeedList.collapseGroup(i);
-                    adapter.setFolderClosed(flatGroupName, true);
+                    anyChange = true;
                 }
             }
+        }
+
+        if (anyChange) {
+            adapter.forceRecount();
         }
     }
 
@@ -502,13 +513,14 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
         if (adapter.isRowSavedSearches(groupPosition)) return;
 
         String flatGroupName = adapter.getGroupUniqueName(groupPosition);
-        // save the expanded preference, since the widget likes to forget it
-        prefsRepo.putBoolean(AppConstants.FOLDER_PRE + "_" + flatGroupName, true);
+        // Persist + update source of truth
+        folderExpansionState.setExpanded(flatGroupName, true);
 
         if (adapter.isRowSavedStories(groupPosition)) return;
 
-        // trigger display/hide of sub-folders
-        adapter.setFolderClosed(flatGroupName, false);
+        // Rebuild list content to show subfolders
+        adapter.forceRecount();
+
         // re-check open/closed state of sub folders, since the list will have forgot them
         checkOpenFolderPreferences();
     }
@@ -521,13 +533,13 @@ public class FolderListFragment extends NbFragment implements OnCreateContextMen
         if (adapter.isRowSavedSearches(groupPosition)) return;
 
         String flatGroupName = adapter.getGroupUniqueName(groupPosition);
-        // save the collapsed preference, since the widget likes to forget it
-        prefsRepo.putBoolean(AppConstants.FOLDER_PRE + "_" + flatGroupName, false);
+        // Persist + update source of truth
+        folderExpansionState.setExpanded(flatGroupName, false);
 
         if (adapter.isRowSavedStories(groupPosition)) return;
 
-        // trigger display/hide of sub-folders
-        adapter.setFolderClosed(flatGroupName, true);
+        // Rebuild list content to hide subfolders
+        adapter.forceRecount();
     }
 
     @Override
